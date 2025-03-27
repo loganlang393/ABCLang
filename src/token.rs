@@ -56,11 +56,11 @@ impl Token for Identifier{
 	}
 	
         fn equals(t: Token, &self) -> bool{
-                return t == self;
+                return t.value == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.identifier;
+                return self.value;
         }
 
 	fn hashCode(&self) -> u32{
@@ -73,6 +73,17 @@ impl Token for LParen{
 			value: "(",
 		}
 	}
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
+        }
 }
 
 impl Token for Rparen{
@@ -81,6 +92,17 @@ impl Token for Rparen{
 			value: ")",
 		}
 	}
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
+        }
 }
 
 impl Token for Plus{
@@ -88,6 +110,17 @@ impl Token for Plus{
                 Self{
                         value: "+",
                 }
+        }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
         }
 }
 
@@ -97,6 +130,17 @@ impl Token for Minus{
                         value: "-",
                 }
         }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
+        }
 }
 
 impl Token for Star{
@@ -104,6 +148,17 @@ impl Token for Star{
                 Self{
                         value: "*",
                 }
+        }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
         }
 }
 
@@ -113,6 +168,17 @@ impl Token for Div{
                         value: "/",
                 }
         }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
+        }
 }
 
 impl Token for Equals{
@@ -120,6 +186,17 @@ impl Token for Equals{
                 Self{
                         value: "=",
                 }
+        }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
         }
 }
 
@@ -129,6 +206,17 @@ impl Token for Semicolon{
                         value: ";",
                 }
         }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
+        }
 }
 
 impl Token for Print{
@@ -136,5 +224,16 @@ impl Token for Print{
                 Self{
                         value: "print",
                 }
+        }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u32{
         }
 }
