@@ -12,19 +12,30 @@ impl tokenizer {
             posi: 0, //position starts on 0
         }
     }
-
+    
+    // Returns index of token
     fn currPosition (&self) -> Option<char> {
         self.tokes.get(self.posi)
     }
 
+    //Skips whitespace
+    fn skips (&mut self) {
+        let curr = self.currPosition();
+        while (position < tokes.len() ){
+            if !ch.is_whitespace(){
+                break;
+            } 
+            self.forwardToke();
+        }
+        
+    }
+
+    //forwarder
     fn forwardTokes(&mut self) -> Option<char> {
         let curr = self.currPosition();
         self.posi += 1;
         
     }
 
-    fn skipWhitespace (&mut self) {
-        while let Some
-    }
     
 }
