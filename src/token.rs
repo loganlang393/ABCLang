@@ -63,7 +63,8 @@ impl Token for Identifier{
                 return self.value;
         }
 
-	fn hashCode(&self) -> u32{
+	fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
 	}
 }
 
@@ -82,7 +83,8 @@ impl Token for LParen{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -101,7 +103,8 @@ impl Token for Rparen{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+		return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -120,7 +123,8 @@ impl Token for Plus{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+		return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -139,7 +143,8 @@ impl Token for Minus{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -158,7 +163,8 @@ impl Token for Star{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -177,7 +183,8 @@ impl Token for Div{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -196,7 +203,8 @@ impl Token for Equals{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -215,7 +223,8 @@ impl Token for Semicolon{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
 
@@ -234,6 +243,7 @@ impl Token for Print{
                 return self.value;
         }
 
-        fn hashCode(&self) -> u32{
+        fn hashCode(&self) -> u8{
+                return self.value.as_bytes()[0] as u8;
         }
 }
