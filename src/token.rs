@@ -12,9 +12,12 @@
 //PRINT
 
 trait Token{
-	fn equals(t: Token, &self);
-	fn toString(&self);
-	fn hashCode(&self);
+	fn new(&mut self);
+	fn equals(&self, t: &dyn Token) -> bool;
+	fn toString(&self) -> String;
+	fn hashCode(&self) -> u8;
+	fn getValue(&self) -> String;
+	fn setValue(&mut self, v: String);
 }
 
 struct Identifier{
@@ -47,203 +50,288 @@ struct Semicolon{
 struct Print{
 	value: String,
 }
+struct Integer{
+	value: String,
+}
 
 impl Token for Identifier{
-	fn new(identifier: &str) -> Self{
-		Self {
-			value: identifier.to_string(),
-		}
-	}
+	fn new(&mut self){}
 	
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
 	fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
 	}
+
+	fn getValue(&self) -> String{
+		return self.value.clone();
+	}
+
+	fn setValue(&mut self, v: String){
+		self.value = v;
+	}
 }
 
 impl Token for LParen{
-	fn new() -> Self{
-		Self {
-			value: "(",
-		}
+	fn new(&mut self){
+		self.value = "(".to_string();
 	}
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
         }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
+        }
 }
 
-impl Token for Rparen{
-	fn new() -> Self{
-		Self{
-			value: ")",
-		}
+impl Token for RParen{
+	fn new(&mut self){
+		self.value = ")".to_string();
 	}
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
 		return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }
 
 impl Token for Plus{
-        fn new() -> Self{
-                Self{
-                        value: "+",
-                }
+        fn new(&mut self){
+                self.value = "+".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
 		return self.value.as_bytes()[0] as u8;
         }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
+        }
 }
 
 impl Token for Minus{
-        fn new() -> Self{
-                Self{
-                        value: "-",
-                }
+        fn new(&mut self){
+                self.value = "-".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }
 
 impl Token for Star{
-        fn new() -> Self{
-                Self{
-                        value: "*",
-                }
+        fn new(&mut self){
+                self.value = "*".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+		self.value = v;
         }
 }
 
 impl Token for Div{
-        fn new() -> Self{
-                Self{
-                        value: "/",
-                }
+        fn new(&mut self){
+                self.value = "/".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }
 
 impl Token for Equals{
-        fn new() -> Self{
-                Self{
-                        value: "=",
-                }
+        fn new(&mut self){
+                self.value = "=".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }
 
 impl Token for Semicolon{
-        fn new() -> Self{
-                Self{
-                        value: ";",
-                }
+        fn new(&mut self){
+                self.value = ";".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }
 
 impl Token for Print{
-        fn new() -> Self{
-                Self{
-                        value: "print",
-                }
+        fn new(&mut self){
+                self.value = "print".to_string();
         }
 
-        fn equals(t: Token, &self) -> bool{
-                return t.value == self.value;
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
         }
 
         fn toString(&self) -> String{
-                return self.value;
+                return self.value.clone();
         }
 
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
+        }
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
+        }
+}
+
+impl Token for Integer{
+        fn new(&mut self){}
+
+        fn equals(&self, t: &dyn Token) -> bool{
+                return t.getValue() == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn hashCode(&self) -> u8{
+                return self.value.parse().expect("Invalid Number");
+	}
+
+        fn getValue(&self) -> String{
+                return self.value.clone();
+        }
+
+        fn setValue(&mut self, v: String){
+                self.value = v;
         }
 }

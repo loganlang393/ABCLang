@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+mod token;
+use token::*;
+
+>>>>>>> origin/logan
 pub struct tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
     posi: usize,
@@ -36,6 +42,7 @@ impl tokenizer {
         
     }
 
+<<<<<<< HEAD
     fn readInteger(&mut self) {
         let mut digit = String::new();
 
@@ -70,4 +77,12 @@ impl tokenizer {
         identifier
     }
     
+=======
+    fn tryReadIntToken(&mut self) -> Token {
+        let int = "";
+	while {
+            
+        }
+    }
+>>>>>>> origin/logan
 }
