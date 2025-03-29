@@ -11,7 +11,7 @@
 //SEMICOLON
 //PRINT
 
-trait Token{
+pub trait Token{
 	fn new(&mut self);
 	fn equals(&self, t: &dyn Token) -> bool;
 	fn toString(&self) -> String;
@@ -20,37 +20,37 @@ trait Token{
 	fn setValue(&mut self, v: String);
 }
 
-struct Identifier{
+pub struct Identifier{
 	value: String,
 }
-struct LParen{
+pub struct LParen{
 	value: String,
 }
-struct RParen{
+pub struct RParen{
 	value: String,
 }
-struct Plus{
+pub struct Plus{
 	value: String,
 }
-struct Minus{
+pub struct Minus{
 	value: String,
 }
-struct Star{
+pub struct Star{
 	value: String,
 }
-struct Div{
+pub struct Div{
 	value: String,
 }
-struct Equals{
+pub struct Equals{
 	value: String,
 }
-struct Semicolon{
+pub struct Semicolon{
 	value: String,
 }
-struct Print{
+pub struct Print{
 	value: String,
 }
-struct Integer{
+pub struct Integer{
 	value: String,
 }
 
