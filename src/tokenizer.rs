@@ -1,5 +1,3 @@
-
-
 pub struct tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
     posi: usize,
@@ -38,5 +36,38 @@ impl tokenizer {
         
     }
 
+    fn readInteger(&mut self) {
+        let mut digit = String::new();
+
+        while let Some(curr) = self.currPosition() {
+            if curr.is_digit(10){
+                digit.push(curr);
+                self.forwardTokes();
+            } else{
+                break;
+            }
+        }
+        
+    }
+
+    fn readString(&mut self) {
+        let mut string = String::new();
+        while let Some(curr) = self.currPosition() {
+            string.push(curr);
+            self.forwardTokes();
+        }
+    }
+
+    fn identifiers(&mut self) -> String{
+        let mut identifier = String::new();
+        while let Some(curr) = self.currPosition(){
+            if curr.is_alphanumeric() { //identifiers only characters and number)
+                identifier.push(curr);
+                self.forwardTokes();
+                
+            }
+        }
+        identifier
+    }
     
 }
