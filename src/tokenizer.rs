@@ -1,9 +1,8 @@
-<<<<<<< HEAD
-=======
+
 mod token;
 use token::*;
 
->>>>>>> origin/logan
+
 pub struct tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
     posi: usize,
@@ -42,7 +41,6 @@ impl tokenizer {
         
     }
 
-<<<<<<< HEAD
     fn readInteger(&mut self) {
         let mut digit = String::new();
 
@@ -76,13 +74,53 @@ impl tokenizer {
         }
         identifier
     }
-    
-=======
-    fn tryReadIntToken(&mut self) -> Token {
-        let int = "";
-	while {
-            
+    //Still work in progress
+    pub fn readToken(&mut self) {
+        self.skips();
+        match self.currPosition(){
+            Some(curr) => match curr {
+                '(' => {
+                    self.forwardTokes();
+                }
+                ')' => {
+                    self.forwardTokes();
+                }
+                '+' => {
+                    self.forwardTokes();
+                    
+                }
+                '-' => {
+                self.forwardTokes();
+                }
+                '*' => {
+                    self.forwardTokes();
+                }
+                '/' => {
+                    self.forwardTokes();
+                }
+                '=' => {
+                    self.forwardTokes();
+                }
+                ';' => {
+                    self.forwardTokes();
+                }
+
+            curr if curr.is_digit(10) => self.readInteger(),
+
+           curr if curr.is_alphanumeric() => {
+                let identifier = self.identifiers();
+                match identifier.as_str(){
+                    "print" => {
+                        self.forwardTokes();
+                        //print token
+                    },
+                    &_ => todo!()
+                }
+            },
+            _ => todo!()
+                
+            },
+            None => todo!()
         }
     }
->>>>>>> origin/logan
 }
