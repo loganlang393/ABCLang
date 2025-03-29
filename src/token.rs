@@ -47,6 +47,9 @@ struct Semicolon{
 struct Print{
 	value: String,
 }
+struct Integer{
+	value: String,
+}
 
 impl Token for Identifier{
 	fn new(identifier: &str) -> Self{
@@ -246,4 +249,23 @@ impl Token for Print{
         fn hashCode(&self) -> u8{
                 return self.value.as_bytes()[0] as u8;
         }
+}
+
+impl Token for Integer{
+        fn new() -> Self{
+                Self{
+                        value: "print",
+                }
+        }
+
+        fn equals(t: Token, &self) -> bool{
+                return t.value == self.value;
+        }
+
+        fn toString(&self) -> String{
+                return self.value;
+        }
+
+        fn hashCode(&self) -> u8{
+                return self.value as u8
 }

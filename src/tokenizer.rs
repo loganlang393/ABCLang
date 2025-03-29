@@ -1,4 +1,5 @@
-
+mod token;
+use token::*;
 
 pub struct tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
@@ -37,5 +38,10 @@ impl tokenizer {
         
     }
 
-    
+    fn tryReadIntToken(&mut self) -> Token {
+        let int = "";
+	while {
+            
+        }
+    }
 }
