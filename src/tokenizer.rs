@@ -15,17 +15,17 @@ impl tokenizer {
     
     // Returns index of token
     fn currPosition (&self) -> Option<char> {
-        self.tokes.get(self.posi)
+        self.tokes.get(self.posi).copied()
     }
 
     //Skips whitespace
     fn skips (&mut self) {
         let curr = self.currPosition();
-        while (position < tokes.len() ){
-            if !ch.is_whitespace(){
+        while self.posi < self.tokes.len() {
+            if !curr.expect("REASON").is_whitespace(){
                 break;
             } 
-            self.forwardToke();
+            self.forwardTokes();
         }
         
     }
@@ -34,6 +34,7 @@ impl tokenizer {
     fn forwardTokes(&mut self) -> Option<char> {
         let curr = self.currPosition();
         self.posi += 1;
+        curr
         
     }
 
