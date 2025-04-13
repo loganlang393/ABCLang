@@ -1,31 +1,29 @@
+use crate::token::Token;
+use std::process;
 
-mod token;
-pub use token::*;
 
-
-pub struct tokenizer{
+pub struct Tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
-    posi: usize,
+    pos: usize,
 }
 
-impl tokenizer {
-    pub fn newToken(nToken: &str) -> Self{
-        tokenizer {
-            tokes: nToken.chars().collect(),// converts that string into vec<char>
-            posi: 0, //position starts on 0
+impl Tokenizer {
+    pub fn newToken(tokes: &str) -> Self{
+        Tokenizer {
+            tokes: tokes.chars().collect(),// converts that string into vec<char>
+            pos: 0, //position starts on 0
         }
     }
     
     // Returns index of token
     fn currPosition (&self) -> Option<char> {
-        self.tokes.get(self.posi).copied()
+        self.tokes.get(self.pos).copied()
     }
 
     //Skips whitespace
     fn skips (&mut self) {
-        let curr = self.currPosition();
-        while self.posi < self.tokes.len() {
-            if !curr.expect("REASON").is_whitespace(){
+        while let Some(curr) = self.currPosition(){
+            if !curr.is_whitespace(){
                 break;
             } 
             self.forwardTokes();
@@ -34,14 +32,14 @@ impl tokenizer {
     }
 
     //forwarder
-    fn forwardTokes(&mut self) -> Option<char> {
-        let curr = self.currPosition();
-        self.posi += 1;
-        curr
+    fn forwardTokes(&mut self) {
+        if self.pos < self.tokes.len(){
+            self.pos += 1;
+        }
         
     }
 
-    fn readInteger(&mut self) {
+    fn readInteger(&mut self) -> Token {
         let mut digit = String::new();
 
         while let Some(curr) = self.currPosition() {
@@ -52,75 +50,130 @@ impl tokenizer {
                 break;
             }
         }
-        
+        Token::Integer(digit.parse().unwrap())
     }
 
-    fn readString(&mut self) {
-        let mut string = String::new();
-        while let Some(curr) = self.currPosition() {
-            string.push(curr);
-            self.forwardTokes();
-        }
-    }
-
-    fn identifiers(&mut self) -> String{
+    fn identifiers(&mut self) -> Token{
         let mut identifier = String::new();
         while let Some(curr) = self.currPosition(){
             if curr.is_alphanumeric() { //identifiers only characters and number)
                 identifier.push(curr);
                 self.forwardTokes();
                 
+            } else{
+                break;
             }
         }
-        identifier
+        Token::Identifier(identifier)
     }
     //Still work in progress
-    pub fn readToken(&mut self) {
+    pub fn readToken(&mut self) -> Option<Token>{
         self.skips();
-        match self.currPosition(){
+        match self.currPosition() {
             Some(curr) => match curr {
                 '(' => {
                     self.forwardTokes();
+                    Some(Token::lParen)
                 }
                 ')' => {
                     self.forwardTokes();
+                    Some(Token::rParen)
                 }
                 '+' => {
                     self.forwardTokes();
-                    
+                    Some(Token::Plus)
                 }
                 '-' => {
-                self.forwardTokes();
+                    self.forwardTokes();
+                    Some(Token::Minus)
                 }
                 '*' => {
                     self.forwardTokes();
+                    Some(Token::Star)
                 }
                 '/' => {
                     self.forwardTokes();
+                    Some(Token::Div)
                 }
                 '=' => {
                     self.forwardTokes();
+                    Some(Token::Equal)
                 }
                 ';' => {
                     self.forwardTokes();
+                    Some(Token::Semicolon)
                 }
-
-            curr if curr.is_digit(10) => self.readInteger(),
-
-           curr if curr.is_alphanumeric() => {
-                let identifier = self.identifiers();
-                match identifier.as_str(){
-                    "print" => {
-                        self.forwardTokes();
-                        //print token
-                    },
-                    &_ => todo!()
+                _ => {
+                    
+                    let identifier = self.identifiers();
+                    if let Token::Identifier(ref id) = identifier {
+                        match id.as_str() {
+                            "println" => {
+                                return Some(Token::kwPrint);
+                            }
+                            "int" => {
+                                return Some(Token::kwInt);
+                            }
+                            "bool" =>{
+                                return Some(Token::kwBool);
+                            }
+                            "null" => {
+                                return Some(Token::Null);
+                            }
+                            "void" => {
+                                return Some(Token::kwVoid);
+                            }
+                            "struct" => {
+                                return Some(Token::kwStruct);
+                            }
+                            "func" => {
+                                return Some(Token::kwFunc);
+                            }
+                            "break" => {
+                                return Some(Token::kwBreak);
+                            }
+                            "return" => {
+                                return Some(Token::kwReturn);
+                            }
+                            "if" => {
+                                return Some(Token::kwIf);
+                            }
+                            "while" => {
+                                return Some(Token::kwWhile);
+                            }
+                            "vardec" => {
+                                return Some(Token::kwVarDec);
+                            }
+                            "block" => {
+                                return Some(Token::kwBlock);
+                            }
+                            "call" => {
+                                return Some(Token::kwCall);
+                            }
+                            "new" => {
+                                return Some(Token::kwNew);
+                            }
+                            _ => {
+                                
+                            }
+                        }
+                    }
+                    Some(identifier)
+                }
+                _ if curr.is_digit(10) => Some(self.readInteger()),
+                _ if curr.is_alphanumeric() => Some(self.identifiers()),
+                _ => {
+                    self.forwardTokes(); // Skip over unrecognized characters
+                    None // Unknown character, could return an error token or None
                 }
             },
-            _ => todo!()
-                
-            },
-            None => todo!()
+            None =>{ 
+                Some(Token::Eof);
+                process::exit(1)
+            }, // End of input
+
         }
-    }
+    }        
+        
+    
 }
