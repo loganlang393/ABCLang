@@ -7,7 +7,7 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "println(something)";
+    let input = "struct";
 
     let mut tokenizer = Tokenizer::newToken(input);
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser

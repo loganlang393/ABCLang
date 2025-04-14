@@ -1,4 +1,5 @@
 #[derive(Debug, Clone)]
+#[derive(PartialEq)]
 pub enum Token {
     // holdings
     Identifier(String),
