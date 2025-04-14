@@ -139,10 +139,15 @@ impl Parser {
                         }
                     }
                     return ASTNode::FuncDef(name, params, ret_type, body);
+                }else{
+                    panic!("Failed to parse function definition");
                 }
+            }else{
+                panic!("Failed to parse funcion definition");
             }
+        }else{
+            panic!("Failed to parse function definition");
         }
-        panic!("Failed to parse function definition");
     }
 
     fn parse_var_dec(&mut self) -> ASTNode {
@@ -157,9 +162,12 @@ impl Parser {
                 if let Some(exp) = self.parse_exp() {
                     return ASTNode::VarDec(var_name, param_type, Box::new(exp));
                 }
+            }else{
+                panic!("Failed to parse variable declaration");
             }
+        }else{
+            panic!("Failed to parse variable declaration");
         }
-        panic!("Failed to parse variable declaration");
     }
 
 // This one actually works, just dies when doing the other parsing
