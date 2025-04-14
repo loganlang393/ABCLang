@@ -7,7 +7,7 @@ use std::any::Any;
 
 pub struct ParseResult{
    result: Box<dyn Any>,
-   position: i32,
+   next_position: i32,
 }
 
 impl ParseResult{
