@@ -9,6 +9,7 @@ pub enum ASTNode {
     StructDef(String, Vec<Param>),
     FuncDef(String, Vec<Param>, String, Vec<ASTNode>),
     VarDec(String, String, Box<ASTNode>),
+    Var(String),
     Assignment(Box<ASTNode>, Box<ASTNode>),
     If(Box<ASTNode>, Vec<ASTNode>),
     While(Box<ASTNode>, Box<ASTNode>),
@@ -21,6 +22,12 @@ pub enum ASTNode {
     Call(String, Vec<ASTNode>),
     New(String, Vec<ASTNode>),
     LHS(String),
+    AddOrMinuxExp(Vec<ASTNode>),
+    MultOrDivExp(Vec<ASTNode>),
+    AddOp,
+    MinusOp,
+    MultOp,
+    DivOp,
 }
 
 #[derive(Debug)]
@@ -117,7 +124,7 @@ impl Parser {
     
 
     fn parse_func_def(&mut self) -> ASTNode {
-        if let Some(Token::funcName(name)) = self.tokenizer.readToken() {
+        if let Some(Token::Identifier(name)) = self.tokenizer.readToken() {
             let mut params = Vec::new();
 
             if let Some(Token::lParen) = self.tokenizer.readToken() {
@@ -194,7 +201,7 @@ impl Parser {
 
     fn parse_return(&mut self) -> ASTNode {
         let mut exp = None;
-        if let Some(token) = self.tokenizer.readToken() {
+        if let Some(Token::kwReturen) = self.tokenizer.readToken() {
             if token != Token::rParen {
                 exp = Some(Box::new(self.parse_exp().expect("Expected expression")));
             }
@@ -239,6 +246,19 @@ impl Parser {
 
     fn parse_exp(&mut self) -> Option<ASTNode> {
         // Handle expressions (integers, calls, structs, etc.)
+        match self.tokenizer.readToken(){
+            Token::Integer(num) => return ASTNode::Integer(num);
+            Token::Identifier(name) => return ASTNode::Var(name);
+            Token::lparem => {
+                match self.tokenizer.readToken(){
+                    Token::Plus => return ASTNode::AddorMinusExp(vec![ASTNode::AddOp, self.parse_exp, self.parse_exp]);
+                    Token::Minus => return ASTNode::AddorMinusExp(vec![ASTNode::MinusOP, self.parse_exp, self.parse_exp]);
+                    Token::Star => return ASTNode::MultorDivideExp(vec![ASTNode::MultOp, self.parse_exp, self.parse_exp]);
+                    Token::Div => return ASTNode::MultorDivideExp(vec![ASTNode::DivOp, self.parse_exp, self.parse_exp]);
+                    _ => panic!("not any known expression")
+                }
+            }
+        }
         None // temp for now
     }
 }
