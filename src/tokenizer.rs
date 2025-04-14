@@ -5,6 +5,7 @@ use std::process;
 pub struct Tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
     pos: usize,
+    eof_flag: bool,
 }
 
 impl Tokenizer {
@@ -12,6 +13,7 @@ impl Tokenizer {
         Tokenizer {
             tokes: tokes.chars().collect(),// converts that string into vec<char>
             pos: 0, //position starts on 0
+            eof_flag: false,
         }
     }
     
@@ -69,6 +71,9 @@ impl Tokenizer {
     //Still work in progress
     pub fn readToken(&mut self) -> Option<Token>{
         self.skips();
+        if self.eof_flag && self.pos >= self.tokes.len(){
+            return None;
+        }
         match self.currPosition() {
             Some(curr) => match curr {
                 '(' => {
@@ -168,8 +173,10 @@ impl Tokenizer {
                 }
             },
             None =>{ 
-                Some(Token::Eof);
-                process::exit(1)
+                self.eof_flag=true;
+                self.forwardTokes();
+                return Some(Token::Eof);
+                //process::exit(1)
             }, // End of input
 
         }
