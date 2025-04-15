@@ -158,6 +158,12 @@ impl Tokenizer {
                             "new" => {
                                 return Some(Token::kwNew);
                             }
+                            "and" =>{
+                                return Some(Token::And);
+                            }
+                            "or" =>{
+                                return Some(Token::Or);
+                            }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   
                             }

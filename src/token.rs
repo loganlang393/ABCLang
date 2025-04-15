@@ -34,6 +34,8 @@ pub enum Token {
     Div,
     Equal,
     Semicolon,
+    And,
+    Or,
     Eof,
 }
 
