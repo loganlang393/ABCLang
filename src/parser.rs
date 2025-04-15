@@ -24,10 +24,14 @@ pub enum ASTNode {
     LHS(String),
     AddOrMinusExp(Vec<ASTNode>),
     MultOrDivExp(Vec<ASTNode>),
+    AndExp(Vec<ASTNode>),
+    OrExp(Vec<ASTNode>),
     AddOp,
     MinusOp,
     MultOp,
     DivOp,
+    AndOp,
+    OrOp,
 }
 
 #[derive(Debug)]
@@ -253,12 +257,15 @@ impl Parser {
         match self.tokenizer.readToken(){
             Some(Token::Integer(num)) => {return Some(ASTNode::Integer(num));}
             Some(Token::Identifier(name)) => {return Some(ASTNode::Var(name));}
+            Some(Token::Bool(bool)) => {return Some(ASTNode::Bool(bool));}
             Some(Token::lParen) => {
                 match self.tokenizer.readToken(){
                     Some(Token::Plus) => {return Some(ASTNode::AddOrMinusExp(vec![ASTNode::AddOp, self.parse_exp()?, self.parse_exp()?]));}
                     Some(Token::Minus) => {return Some(ASTNode::AddOrMinusExp(vec![ASTNode::MinusOp, self.parse_exp()?, self.parse_exp()?]));}
                     Some(Token::Star) => {return Some(ASTNode::MultOrDivExp(vec![ASTNode::MultOp, self.parse_exp()?, self.parse_exp()?]));}
                     Some(Token::Div) => {return Some(ASTNode::MultOrDivExp(vec![ASTNode::DivOp, self.parse_exp()?, self.parse_exp()?]));}
+                    Some(Token::And) => {return Some(ASTNode::AndExp(vec![ASTNode::AndOp, self.parse_exp()?, self.parse_exp()?]));}
+                    Some(Token::Or) => {return Some(ASTNode::OrExp(vec![ASTNode::OrOp, self.parse_exp()?, self.parse_exp()?]));}
                     _ => {panic!("not any known expression")}
                 }
             }
