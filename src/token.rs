@@ -75,6 +75,8 @@ impl Token {
             Token::Div => "/".to_string(),
             Token::Equal => "=".to_string(),
             Token::Semicolon => ";".to_string(),
+            Token::And => "and".to_string(),
+            Token::Or => "or".to_string(),
             Token::Eof => "EOF".to_string(),
         }
     }

@@ -22,7 +22,7 @@ pub enum ASTNode {
     Call(String, Vec<ASTNode>),
     New(String, Vec<ASTNode>),
     LHS(String),
-    AddOrMinuxExp(Vec<ASTNode>),
+    AddOrMinusExp(Vec<ASTNode>),
     MultOrDivExp(Vec<ASTNode>),
     AddOp,
     MinusOp,
@@ -168,6 +168,8 @@ impl Parser {
             if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
                 if let Some(exp) = self.parse_exp() {
                     return ASTNode::VarDec(var_name, param_type, Box::new(exp));
+                }else{
+                    panic!("Failed to parse variable declaration");
                 }
             }else{
                 panic!("Failed to parse variable declaration");
@@ -201,9 +203,11 @@ impl Parser {
 
     fn parse_return(&mut self) -> ASTNode {
         let mut exp = None;
-        if let Some(Token::kwReturen) = self.tokenizer.readToken() {
+        if let Some(token) = self.tokenizer.readToken() {
             if token != Token::rParen {
                 exp = Some(Box::new(self.parse_exp().expect("Expected expression")));
+            }else{
+                panic!("Can't parse return statement")
             }
         }
         ASTNode::Return(exp)
@@ -247,17 +251,18 @@ impl Parser {
     fn parse_exp(&mut self) -> Option<ASTNode> {
         // Handle expressions (integers, calls, structs, etc.)
         match self.tokenizer.readToken(){
-            Token::Integer(num) => return ASTNode::Integer(num);
-            Token::Identifier(name) => return ASTNode::Var(name);
-            Token::lparem => {
+            Some(Token::Integer(num)) => {return Some(ASTNode::Integer(num));}
+            Some(Token::Identifier(name)) => {return Some(ASTNode::Var(name));}
+            Some(Token::lParen) => {
                 match self.tokenizer.readToken(){
-                    Token::Plus => return ASTNode::AddorMinusExp(vec![ASTNode::AddOp, self.parse_exp, self.parse_exp]);
-                    Token::Minus => return ASTNode::AddorMinusExp(vec![ASTNode::MinusOP, self.parse_exp, self.parse_exp]);
-                    Token::Star => return ASTNode::MultorDivideExp(vec![ASTNode::MultOp, self.parse_exp, self.parse_exp]);
-                    Token::Div => return ASTNode::MultorDivideExp(vec![ASTNode::DivOp, self.parse_exp, self.parse_exp]);
-                    _ => panic!("not any known expression")
+                    Some(Token::Plus) => {return Some(ASTNode::AddOrMinusExp(vec![ASTNode::AddOp, self.parse_exp()?, self.parse_exp()?]));}
+                    Some(Token::Minus) => {return Some(ASTNode::AddOrMinusExp(vec![ASTNode::MinusOp, self.parse_exp()?, self.parse_exp()?]));}
+                    Some(Token::Star) => {return Some(ASTNode::MultOrDivExp(vec![ASTNode::MultOp, self.parse_exp()?, self.parse_exp()?]));}
+                    Some(Token::Div) => {return Some(ASTNode::MultOrDivExp(vec![ASTNode::DivOp, self.parse_exp()?, self.parse_exp()?]));}
+                    _ => {panic!("not any known expression")}
                 }
             }
+            _ => {panic!("not any known expression")}
         }
         None // temp for now
     }
