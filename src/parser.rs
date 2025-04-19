@@ -6,7 +6,7 @@ use std::process;
 #[derive(Debug)]
 pub enum ASTNode {
     Program(Vec<ASTNode>),
-    StructDef(String, Vec<Token>),
+    StructDef(String, Vec<Param>),
     FuncDef(String, Vec<Param>, String, Vec<ASTNode>),
     VarDec(String, String, Box<ASTNode>),
     Var(String),
@@ -85,10 +85,9 @@ impl Parser {
             if let Some(Token::lParen) = self.tokenizer.readToken() {
                 println!("while loop");
                 let mut param = self.tokenizer.readToken();
-                while matches!(param, Some(Token::Identifier(_))) {
+                while let Some(param) = self.parse_param() {
                     println!("Before Push");
-                    params.push(param.expect("not a parameter"));
-                    param = self.tokenizer.readToken();
+                    params.push(param);
                 }
                 if matches!(param, Some(Token::rParen)) {
                     return ASTNode::StructDef(name, params);
@@ -111,11 +110,10 @@ impl Parser {
             _ => return None,
         };
 
-            
         if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
             return Some(Param { var: var_name});
         }else{
-            panic!("not a parameter")
+            return None;
         }
     }
     
