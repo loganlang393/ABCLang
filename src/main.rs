@@ -21,7 +21,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Failed to parse struct definition")]
+    #[should_panic(expected = "Failed to parse struct definition: not labeled")]
     fn test_struct_incomplete(){
         let input = "struct";
        
@@ -33,12 +33,11 @@ mod tests {
 
     #[test]
     fn test_struct_complete(){
-        let input = "struct test (defautl)";
+        let input = "struct test()";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);
 
         let ast = parser.parse();
-
     }
 }

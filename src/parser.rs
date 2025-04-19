@@ -6,7 +6,7 @@ use std::process;
 #[derive(Debug)]
 pub enum ASTNode {
     Program(Vec<ASTNode>),
-    StructDef(String, Vec<Param>),
+    StructDef(String, Vec<Token>),
     FuncDef(String, Vec<Param>, String, Vec<ASTNode>),
     VarDec(String, String, Box<ASTNode>),
     Var(String),
@@ -37,7 +37,6 @@ pub enum ASTNode {
 #[derive(Debug)]
 pub struct Param {
     var: String, 
-    param_type: String,
 }
 
 pub struct Parser {
@@ -82,47 +81,42 @@ impl Parser {
         println!("Parsing that strucutre!");
         if let Some(Token::Identifier(name)) = self.tokenizer.readToken() {
             println!("Struct name: {}", name);
-            if let Some(Token::Identifier(name)) = self.tokenizer.readToken(){
-                let mut params = Vec::new();
-                if let Some(Token::lParen) = self.tokenizer.readToken() {
-                    println!("while loop");
-                    while let Some(param) = self.parse_param() {
-                        println!("Before Push");
-                        params.push(param);
-                    }
-                    if let Some(Token::rParen) = self.tokenizer.readToken() {
-                        return ASTNode::StructDef(name, params);
-                    }else{
-                        panic!("Failed to parse struct definition");
-                    }
+            let mut params = Vec::new();
+            if let Some(Token::lParen) = self.tokenizer.readToken() {
+                println!("while loop");
+                let mut param = self.tokenizer.readToken();
+                while matches!(param, Some(Token::Identifier(_))) {
+                    println!("Before Push");
+                    params.push(param.expect("not a parameter"));
+                    param = self.tokenizer.readToken();
+                }
+                if matches!(param, Some(Token::rParen)) {
+                    return ASTNode::StructDef(name, params);
                 }else{
-                    panic!("Failed to parse struct definition");
+                    panic!("Failed to parse struct definition: no right parenthisis for parameters");
                 }
             }else{
-                panic!("Failed to parse struct definition");
+                panic!("Failed to parse struct definition: no left paranthesis for parameters");
             }
         }else{
-            panic!("Failed to parse struct definition");
+            panic!("Failed to parse struct definition: not labeled");
         }
     }
 
     fn parse_param(&mut self) -> Option<Param> {
-        if let Some(Token::lParen) = self.tokenizer.readToken() {
-            let param_type = match self.tokenizer.readToken() {
-                Some(Token::kwInt) => "int".to_string(),
-                Some(Token::kwBool) => "bool".to_string(),
-                Some(Token::Identifier(var)) => var,
-                _ => return None,
-            };
+        let param_type = match self.tokenizer.readToken() {
+            Some(Token::kwInt) => "int".to_string(),
+            Some(Token::kwBool) => "bool".to_string(),
+            Some(Token::Identifier(var)) => var,
+            _ => return None,
+        };
 
-            if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
-                if let Some(Token::rParen) = self.tokenizer.readToken() {
-                    return Some(Param { var: var_name, param_type });
-                }
-            }
+            
+        if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
+            return Some(Param { var: var_name});
+        }else{
+            panic!("not a parameter")
         }
-
-        None
     }
     
     
