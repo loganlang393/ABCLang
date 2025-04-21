@@ -63,6 +63,26 @@ mod tests {
     }
 
     #[test]
+    fn test_func_body(){
+        let input = "func test() void \n \t print 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_struct_with_func(){
+        let input = "struct test() \n \t func test() void \n \t print 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+    
+    #[test]
     fn test_var_complete(){
         let input = "vardec int test 5";
 
