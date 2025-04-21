@@ -7,7 +7,7 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "struct test";
+    let input = "struct test()";
 
     let mut tokenizer = Tokenizer::newToken(input);
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
@@ -34,6 +34,17 @@ mod tests {
     #[test]
     fn test_struct_complete(){
         let input = "struct test()";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    #[should_panic(expected="Failed to parse function definition: not named")]
+    fn test_function_incomplete(){
+        let input = "func";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);

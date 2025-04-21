@@ -7,6 +7,7 @@ pub enum Token {
     structName(String),
     Integer(i32),
     Bool(bool),
+    Tab,
     Null,
     // Keywords
     kwInt,
@@ -51,6 +52,7 @@ impl Token {
             Token::structName( s) => s.clone(),
             Token::Integer(i) => i.to_string(),
             Token::Bool(b) => b.to_string(),
+            Token::Tab => "\t".to_string(),
             Token::Null => "null".to_string(),
             Token::kwInt => "int".to_string(),
             Token::kwBool => "bool".to_string(),     

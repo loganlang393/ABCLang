@@ -34,7 +34,7 @@ impl Tokenizer {
     }
 
     //forwarder
-    fn forwardTokes(&mut self) {
+    pub fn forwardTokes(&mut self) {
         if self.pos < self.tokes.len(){
             self.pos += 1;
         }
@@ -77,35 +77,27 @@ impl Tokenizer {
         match self.currPosition() {
             Some(curr) => match curr {
                 '(' => {
-                    self.forwardTokes();
                     Some(Token::lParen)
                 }
                 ')' => {
-                    self.forwardTokes();
                     Some(Token::rParen)
                 }
                 '+' => {
-                    self.forwardTokes();
                     Some(Token::Plus)
                 }
                 '-' => {
-                    self.forwardTokes();
                     Some(Token::Minus)
                 }
                 '*' => {
-                    self.forwardTokes();
                     Some(Token::Star)
                 }
                 '/' => {
-                    self.forwardTokes();
                     Some(Token::Div)
                 }
                 '=' => {
-                    self.forwardTokes();
                     Some(Token::Equal)
                 }
                 ';' => {
-                    self.forwardTokes();
                     Some(Token::Semicolon)
                 }
                 _ => {
@@ -164,6 +156,9 @@ impl Tokenizer {
                             "or" =>{
                                 return Some(Token::Or);
                             }
+                            "\t" =>{
+                                return Some(Token::Tab);
+                            }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   
                             }
@@ -180,7 +175,6 @@ impl Tokenizer {
             },
             None =>{ 
                 self.eof_flag=true;
-                self.forwardTokes();
                 return Some(Token::Eof);
                 //process::exit(1)
             }, // End of input

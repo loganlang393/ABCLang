@@ -41,11 +41,12 @@ pub struct Param {
 
 pub struct Parser {
     tokenizer: Tokenizer,
+    tab: i32,
 }
 
 impl Parser {
     pub fn new(tokenizer: Tokenizer) -> Self{
-        Parser { tokenizer }
+        Parser { tokenizer, tab:0 }
     }
 
     pub fn parse(&mut self) -> ASTNode {
@@ -55,12 +56,15 @@ impl Parser {
         while let Some(token) = self.tokenizer.readToken() {
             match token {
                 Token::kwStruct => {
+                    self.tokenizer.forwardTokes();
                     nodes.push(self.parse_struct_def());
                 }
                 Token::kwFunc => {
+                    self.tokenizer.forwardTokes();
                     nodes.push(self.parse_func_def());
                 }
                 Token::kwVarDec => {
+                    self.tokenizer.forwardTokes();
                     nodes.push(self.parse_var_dec());
                 }
                 _ => {
@@ -78,18 +82,19 @@ impl Parser {
     
 // breaks (panics!)
     fn parse_struct_def(&mut self) -> ASTNode {
-        println!("Parsing that strucutre!");
+        println!("Parsing that structure!");
         if let Some(Token::Identifier(name)) = self.tokenizer.readToken() {
             println!("Struct name: {}", name);
             let mut params = Vec::new();
             if let Some(Token::lParen) = self.tokenizer.readToken() {
+                self.tokenizer.forwardTokes();
                 println!("while loop");
-                let mut param = self.tokenizer.readToken();
                 while let Some(param) = self.parse_param() {
                     println!("Before Push");
                     params.push(param);
                 }
-                if matches!(param, Some(Token::rParen)) {
+                if matches!(self.tokenizer.readToken(), Some(Token::rParen)) {
+                    self.tokenizer.forwardTokes();
                     return ASTNode::StructDef(name, params);
                 }else{
                     panic!("Failed to parse struct definition: no right parenthisis for parameters");
@@ -110,10 +115,13 @@ impl Parser {
             _ => return None,
         };
 
+        self.tokenizer.forwardTokes();
+
         if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
+            self.tokenizer.forwardTokes();
             return Some(Param { var: var_name});
         }else{
-            return None;
+            panic!("no parameter identifier");
         }
     }
     
@@ -143,13 +151,13 @@ impl Parser {
                     }
                     return ASTNode::FuncDef(name, params, ret_type, body);
                 }else{
-                    panic!("Failed to parse function definition");
+                    panic!("Failed to parse function definition: no right parenthesis");
                 }
             }else{
-                panic!("Failed to parse funcion definition");
+                panic!("Failed to parse funcion definition: no left parenthesis");
             }
         }else{
-            panic!("Failed to parse function definition");
+            panic!("Failed to parse function definition: not named");
         }
     }
 
