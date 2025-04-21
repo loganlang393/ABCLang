@@ -5,11 +5,17 @@ mod parser; // Include the parser module
 
 use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
+use std::env; // Import for command line arguments
+use std::fs; //import for File Reading
+
 
 fn main() {
-    let input = "func test() void";
+    let args: Vec<String> = env::args().collect();
+    let file = &args[1];
+    let input = fs::read_to_string(file).expect("Should be a file");
+    println!("Text: {input}");
 
-    let mut tokenizer = Tokenizer::newToken(input);
+    let mut tokenizer = Tokenizer::newToken(input.as_str());
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
 
     let ast = parser.parse(); // Parse the input
