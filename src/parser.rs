@@ -177,8 +177,10 @@ impl Parser {
                     self.tab += 1;
                     let mut body = Vec::new();
                     while let Some(stmt) = self.tokenizer.readToken(){
-                        if let Some(node) = self.parse_stmt(stmt.clone()) {
+                        if let Some(node) = self.parse_stmt(stmt.clone()){
                             body.push(node);
+                        }else{
+                            break;
                         }
                     }
                     self.tab -= 1;
@@ -246,7 +248,7 @@ impl Parser {
                 }
             }
             // Add other statements as necessary
-            _ => {}
+            _ => {return None}
         }
 
         None
