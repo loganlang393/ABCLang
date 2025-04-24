@@ -40,35 +40,46 @@ pub struct Param {
 }
 
 pub struct Parser {
-    tokenizer: Tokenizer,
+    tokens: Vec<Token>,
+    pos: usize,
     tab: i32,
 }
 
 impl Parser {
-    pub fn new(tokenizer: Tokenizer) -> Self{
-        Parser { tokenizer, tab:0 }
+    pub fn new(mut tokenizer: Tokenizer) -> Self{
+        Parser { tokens: tokenizer.tokenize(), pos: 0, tab:0 }
     }
 
     pub fn parse(&mut self) -> ASTNode {
         let mut nodes = Vec::new();
 		
         
-        while let Some(token) = self.tokenizer.readToken() {
-            match token {
-                Token::kwStruct => {
+        while self.pos < self.tokens.len() {
+            match Some(self.tokens[self.pos].clone()) {
+                Some(Token::kwStruct) => {
+                    self.pos+=1;
                     nodes.push(self.parse_struct_def());
                 }
-                Token::kwFunc(tab) => {
+                Some(Token::kwFunc(tab)) => {
+                    self.pos+=1;
                     nodes.push(self.parse_func_def(tab));
                 }
-                Token::kwVarDec(tab) => {
+                Some(Token::kwVarDec(tab)) => {
+                    self.pos+=1;
                     nodes.push(self.parse_var_dec(tab));
+                }
+                Some(Token::Eof) =>{
+                    self.pos+=1;
+                    println!("End of file");
+                    break;
                 }
                 _ => {
                     // literally everything else
-                    if let Some(node) = self.parse_stmt(token.clone()) {
-                        self.tokenizer.forwardTokes();
+                    if let Some(node) = self.parse_stmt() {
+                        self.pos+=1;
                         nodes.push(node);
+                    }else{
+                        panic!("Can't parse")
                     }
                 }
             }
@@ -85,24 +96,27 @@ impl Parser {
         }
 
         println!("Parsing that structure!");
-        if let Some(Token::Identifier(name)) = self.tokenizer.readToken() {
+        if let Token::Identifier(name) = self.tokens[self.pos].clone() {
+            self.pos+=1;
             println!("Struct name: {}", name);
             let mut params = Vec::new();
-            if let Some(Token::lParen) = self.tokenizer.readToken() {
-                self.tokenizer.forwardTokes();
+            if let Token::lParen = self.tokens[self.pos].clone() {
+                self.pos+=1;
                 println!("while loop");
                 while let Some(param) = self.parse_param() {
                     println!("Before Push");
                     params.push(param);
                 }
-                if matches!(self.tokenizer.readToken(), Some(Token::rParen)) {
+                if matches!(self.tokens[self.pos].clone(), Token::rParen) {
                     self.tab += 1;
-                    self.tokenizer.forwardTokes();
+                    self.pos+=1;
                     let mut body = Vec::new();
 
-                    while let Some(stmt) = self.tokenizer.readToken(){
+                    while let stmt = self.tokens[self.pos].clone(){
+                        println!("loop structure {}", stmt.clone().toString());
                         match stmt {
                             Token::kwFunc(tab) => {
+                                //println!("func");
                                 if(tab == self.tab){
                                     body.push(self.parse_func_def(tab));
                                 }else{
@@ -136,17 +150,17 @@ impl Parser {
     }
 
     fn parse_param(&mut self) -> Option<Param> {
-        let param_type = match self.tokenizer.readToken() {
-            Some(Token::kwInt) => "int".to_string(),
-            Some(Token::kwBool) => "bool".to_string(),
-            Some(Token::Identifier(var)) => var,
+        let param_type = match self.tokens[self.pos].clone() {
+            Token::kwInt => "int".to_string(),
+            Token::kwBool => "bool".to_string(),
+            Token::Identifier(var) => var,
             _ => return None,
         };
 
-        self.tokenizer.forwardTokes();
+        self.pos+=1;
 
-        if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
-            self.tokenizer.forwardTokes();
+        if let Token::Identifier(var_name) = self.tokens[self.pos].clone() {
+            self.pos+=1;
             return Some(Param { var: var_name});
         }else{
             panic!("no parameter identifier");
@@ -156,34 +170,34 @@ impl Parser {
     
 
     fn parse_func_def(&mut self, tab: i32) -> ASTNode {
-        if let Some(Token::Identifier(name)) = self.tokenizer.readToken() {
+        if let Token::Identifier(name) = self.tokens[self.pos].clone() {
+            self.pos+=1;
             let mut params = Vec::new();
-
-            if let Some(Token::lParen) = self.tokenizer.readToken() {
-                self.tokenizer.forwardTokes();
+            println!("{}", name);
+            //self.tokenizer.forwardTokes();
+            if let Token::lParen = self.tokens[self.pos].clone() {
+                self.pos+=1;
                 while let Some(param) = self.parse_param() {
                     params.push(param);
                 }
-                if let Some(Token::rParen) = self.tokenizer.readToken() {
-                    self.tokenizer.forwardTokes();
-                    let ret_type = match self.tokenizer.readToken() {
-                        Some(Token::kwVoid) => "void".to_string(),
-                        Some(Token::kwInt) => "int".to_string(),
-                        Some(Token::kwBool) => "bool".to_string(),
+                if let Token::rParen = self.tokens[self.pos].clone() {
+                    self.pos+=1;
+                    let ret_type = match self.tokens[self.pos].clone() {
+                        Token::kwVoid => "void".to_string(),
+                        Token::kwInt => "int".to_string(),
+                        Token::kwBool => "bool".to_string(),
                         _ => panic!("Expected return type"),
                     };
                     
-                    self.tokenizer.forwardTokes();
+                    self.pos+=1;
                     self.tab += 1;
                     let mut body = Vec::new();
-                    while let Some(stmt) = self.tokenizer.readToken(){
-                        if let Some(node) = self.parse_stmt(stmt.clone()){
-                            body.push(node);
-                        }else{
-                            break;
-                        }
+                    while let Some(stmt) = self.parse_stmt(){
+                        println!("loop function ");
+                        body.push(stmt);
                     }
                     self.tab -= 1;
+                    //println!("{}", self.tab);
                     return ASTNode::FuncDef(name, params, ret_type, body);
                 }else{
                     panic!("Failed to parse function definition: no right parenthesis");
@@ -197,15 +211,15 @@ impl Parser {
     }
 
     fn parse_var_dec(&mut self, tab: i32) -> ASTNode {
-        let param_type = match self.tokenizer.readToken() {
-            Some(Token::kwInt) => "int".to_string(),
-            Some(Token::kwBool) => "bool".to_string(),
+        let param_type = match self.tokens[self.pos].clone() {
+            Token::kwInt => "int".to_string(),
+            Token::kwBool => "bool".to_string(),
             _ => panic!("Expected variable type"),
         };
-        self.tokenizer.forwardTokes();
+        self.pos+=1;
 
-        if let Some(Token::Identifier(var_name)) = self.tokenizer.readToken() {
-            self.tokenizer.forwardTokes();
+        if let Token::Identifier(var_name) = self.tokens[self.pos].clone() {
+            self.pos+=1;
             if let Some(exp) = self.parse_exp() {
                 return ASTNode::VarDec(var_name, param_type, Box::new(exp));
             }else{
@@ -217,7 +231,9 @@ impl Parser {
     }
 
 // This one actually works, just dies when doing the other parsing
-    fn parse_stmt(&mut self, token: Token) -> Option<ASTNode> {
+    fn parse_stmt(&mut self) -> Option<ASTNode> {
+        let token = self.tokens[self.pos].clone();
+        println!("statement {}", token.clone().toString());
         match token {
             Token::kwReturn(tab) => {
                 if(tab == self.tab){
@@ -250,14 +266,12 @@ impl Parser {
             // Add other statements as necessary
             _ => {return None}
         }
-
-        None
     }
 
     fn parse_return(&mut self, tab: i32) -> ASTNode {
         let mut exp = None;
-        self.tokenizer.forwardTokes();
-        if let Some(token) = self.tokenizer.readToken() {
+        self.pos+=1;
+        if let token = self.tokens[self.pos].clone() {
             if token != Token::rParen {
                 exp = Some(Box::new(self.parse_exp().expect("Expected expression")));
             }else{
@@ -268,17 +282,16 @@ impl Parser {
     }
 
     fn parse_if(&mut self, tab: i32) -> ASTNode {
-        self.tokenizer.forwardTokes();
+        self.pos+=1;
         let condition = self.parse_exp().expect("Expected condition for if statement");
         let mut then_branch = Vec::new();
 
-        if let Some(Token::lParen) = self.tokenizer.readToken() {
-            while let Some(stmt) = self.tokenizer.readToken() {
-                if let Some(node) = self.parse_stmt(stmt.clone()) {
-                    then_branch.push(node);
-                }
+        if let Token::lParen = self.tokens[self.pos].clone() {
+            while let Some(stmt) = self.parse_stmt() {
+                then_branch.push(stmt);
             }
-            if let Some(Token::rParen) = self.tokenizer.readToken() {
+            self.pos+=1;
+            if let Token::rParen = self.tokens[self.pos].clone() {
                 return ASTNode::If(Box::new(condition), then_branch);
             }
         }
@@ -287,18 +300,17 @@ impl Parser {
     }
 
     fn parse_while(&mut self, tab: i32) -> ASTNode {
-        self.tokenizer.forwardTokes();
+        self.pos+=1;
         let condition = self.parse_exp().expect("Expected condition for while statement");
 
         // Store the body statement in a local variable
-        let body_stmt = self.tokenizer.readToken().expect("Expected statement for while body");
-        let body = self.parse_stmt(body_stmt).expect("Failed to parse while body");
+        let body = self.parse_stmt().expect("Failed to parse while body");
         
         ASTNode::While(Box::new(condition), Box::new(body))
     }
 
     fn parse_print(&mut self, tab: i32) -> ASTNode {
-        self.tokenizer.forwardTokes();
+        self.pos+=1;
         if let Some(exp) = self.parse_exp() {
             return ASTNode::Print(Box::new(exp));
         }
@@ -307,77 +319,77 @@ impl Parser {
 
     fn parse_exp(&mut self) -> Option<ASTNode> {
         // Handle expressions (integers, calls, structs, etc.)
-        match self.tokenizer.readToken(){
+        match Some(self.tokens[self.pos].clone()){
             Some(Token::Integer(num)) => {
-                self.tokenizer.forwardTokes();
+                self.pos+=1;
                 return Some(ASTNode::Integer(num));
             }
             Some(Token::Identifier(name)) => {
-                self.tokenizer.forwardTokes();
+                self.pos+=1;
                 return Some(ASTNode::Var(name));
             }
             Some(Token::Bool(bool)) => {
-                self.tokenizer.forwardTokes();
+                self.pos+=1;
                 return Some(ASTNode::Bool(bool));
             }
             Some(Token::lParen) => {
-                self.tokenizer.forwardTokes();
-                match self.tokenizer.readToken(){
+                self.pos+=1;
+                match Some(self.tokens[self.pos].clone()){
                     Some(Token::Plus) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp = Some(ASTNode::AddOrMinusExp(vec![ASTNode::AddOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")
                         }
                     }
                     Some(Token::Minus) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp = Some(ASTNode::AddOrMinusExp(vec![ASTNode::MinusOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")
                         }
                     }
                     Some(Token::Star) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp = Some(ASTNode::MultOrDivExp(vec![ASTNode::MultOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")
                         }
                     }
                     Some(Token::Div) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp =  Some(ASTNode::MultOrDivExp(vec![ASTNode::DivOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")
                         }
                     }
                     Some(Token::And) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp = Some(ASTNode::AndExp(vec![ASTNode::AndOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")
                         }
                     }
                     Some(Token::Or) => {
-                        self.tokenizer.forwardTokes();
+                        self.pos+=1;
                         let exp =  Some(ASTNode::OrExp(vec![ASTNode::OrOp, self.parse_exp()?, self.parse_exp()?]));
-                        if let Some(Token::rParen) = self.tokenizer.readToken(){
-                            self.tokenizer.forwardTokes();
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")

@@ -18,6 +18,16 @@ impl Tokenizer {
             tab: 0,
         }
     }
+
+    pub fn tokenize(&mut self) -> Vec<Token>{
+        let mut tokens = Vec::new();
+        
+        while let Some(curr) = self.readToken(){
+            tokens.push(curr);
+        }
+
+        return tokens;
+    }
     
     // Returns index of token
     fn currPosition (&self) -> Option<char> {
@@ -65,7 +75,6 @@ impl Tokenizer {
             if curr.is_alphanumeric() { //identifiers only characters and number)
                 identifier.push(curr);
                 self.forwardTokes();
-                
             } else{
                 break;
             }
@@ -81,27 +90,35 @@ impl Tokenizer {
         match self.currPosition() {
             Some(curr) => match curr {
                 '(' => {
+                    self.forwardTokes();
                     Some(Token::lParen)
                 }
                 ')' => {
+                    self.forwardTokes();
                     Some(Token::rParen)
                 }
                 '+' => {
+                    self.forwardTokes();
                     Some(Token::Plus)
                 }
                 '-' => {
+                    self.forwardTokes();
                     Some(Token::Minus)
                 }
                 '*' => {
+                    self.forwardTokes();
                     Some(Token::Star)
                 }
                 '/' => {
+                    self.forwardTokes();
                     Some(Token::Div)
                 }
                 '=' => {
+                    self.forwardTokes();
                     Some(Token::Equal)
                 }
                 ';' => {
+                    self.forwardTokes();
                     Some(Token::Semicolon)
                 }
                 _ => {
@@ -174,6 +191,9 @@ impl Tokenizer {
                             "or" =>{
                                 return Some(Token::Or);
                             }
+                            num if num.chars().all(|c| c.is_numeric()) => {
+                                return Some(Token::Integer(num.parse().unwrap()));
+                            }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   
                             }
@@ -181,11 +201,8 @@ impl Tokenizer {
                     }
                     Some(identifier)
                 }
-                _ if curr.is_digit(10) => Some(self.readInteger()),
-                _ if curr.is_alphanumeric() => Some(self.identifiers()),
                 _ => {
-                    self.forwardTokes(); // Skip over unrecognized characters
-                    None // Unknown character, could return an error token or None
+                    panic!("unrechognized token") // Unknown character, could return an error token or None
                 }
             },
             None =>{ 

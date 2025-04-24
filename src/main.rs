@@ -7,18 +7,32 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "struct test() \n \t func test() void \n \t \t println 5";
+    let input = "struct test() \n \t func test() void \n \t \t println 5 \n \t \t println test \n \t func";
 
     let mut tokenizer = Tokenizer::newToken(input);
-    let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
+    //let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
 
-    let ast = parser.parse(); // Parse the input
-    println!("{:#?}", ast); // Print the parsed AST for verification
+    let mut tokens = tokenizer.tokenize();
+
+    for tok in &tokens{
+        println!("{}", tok.toString());
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_tokenize(){
+        let input = "struct func var";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+
+        let mut tokens = tokenizer.tokenize();
+
+        assert_eq!(tokens.len(), 4);
+    }
 
     #[test]
     #[should_panic(expected = "Failed to parse struct definition: not labeled")]
