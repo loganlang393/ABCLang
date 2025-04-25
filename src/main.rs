@@ -7,7 +7,7 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "struct test() \n \t func test() void \n \t \t println 5 \n \t \t println test \n \t func test2() void";
+    let input = "struct test() \n \t func test() void \n \t \t println 5 \n \t \t println test \n \t func test2() void \n \t \t println (/(+ 5 4) 3)";
 
     let mut tokenizer = Tokenizer::newToken(input);
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
@@ -97,6 +97,36 @@ mod tests {
     #[test]
     fn test_var_complete(){
         let input = "vardec int test 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_var_add_expression(){
+        let input = "vardec int test (+ 5 4)";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_var_minus_expression(){
+        let input = "vardec int test (- 5 4)";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_expression_within_expression(){
+        let input = "vardec int test (/(+ 5 4) 3)";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);
