@@ -79,7 +79,7 @@ impl Parser {
                         self.pos+=1;
                         nodes.push(node);
                     }else{
-                        panic!("Can't parse")
+                        panic!("Can't parse {}", self.tokens[self.pos].clone().toString());
                     }
                 }
             }
@@ -118,6 +118,7 @@ impl Parser {
                             Token::kwFunc(tab) => {
                                 //println!("func");
                                 if(tab == self.tab){
+                                    self.pos+=1;
                                     body.push(self.parse_func_def(tab));
                                 }else{
                                     break;
@@ -125,6 +126,7 @@ impl Parser {
                             }
                             Token::kwVarDec(tab) => {
                                 if(tab == self.tab){
+                                    self.pos+=1;
                                     body.push(self.parse_var_dec(tab));
                                 }else{
                                     break;

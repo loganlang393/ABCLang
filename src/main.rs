@@ -7,16 +7,14 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "struct test() \n \t func test() void \n \t \t println 5 \n \t \t println test \n \t func";
+    let input = "struct test() \n \t func test() void \n \t \t println 5 \n \t \t println test \n \t func test2() void";
 
     let mut tokenizer = Tokenizer::newToken(input);
-    //let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
+    let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
 
-    let mut tokens = tokenizer.tokenize();
+    let mut ast = parser.parse();
 
-    for tok in &tokens{
-        println!("{}", tok.toString());
-    }
+    println!("{:#?}", ast);
 }
 
 #[cfg(test)]
@@ -78,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_func_body(){
-        let input = "func test() void \n \t print 5";
+        let input = "func test() void \n \t println 5";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);
@@ -88,7 +86,7 @@ mod tests {
 
     #[test]
     fn test_struct_with_func(){
-        let input = "struct test() \n \t func test() void \n \t print 5";
+        let input = "struct test() \n \t func test() void \n \t \t println 5";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);
