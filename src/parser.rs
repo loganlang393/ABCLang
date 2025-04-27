@@ -11,11 +11,14 @@ pub enum ASTNode {
     VarDec(String, String, Box<ASTNode>),
     Var(String),
     Assignment(Box<ASTNode>, Box<ASTNode>),
-    If(Box<ASTNode>, Vec<ASTNode>),
+    If(Box<ASTNode>, Vec<ASTNode>, Vec<ASTNode>),
+    ElIf(Box<ASTNode>, Vec<ASTNode>),
+    Else(Vec<ASTNode>),
     While(Box<ASTNode>, Box<ASTNode>),
     Print(Box<ASTNode>),
     Return(Option<Box<ASTNode>>),
     Block(Vec<ASTNode>),
+    Set(Vec<ASTNode>),
     Integer(i32),
     Bool(bool),
     Null,
@@ -26,12 +29,16 @@ pub enum ASTNode {
     MultOrDivExp(Vec<ASTNode>),
     AndExp(Vec<ASTNode>),
     OrExp(Vec<ASTNode>),
+    NotExp(Vec<ASTNode>),
+    CompExp(Vec<ASTNode>),
     AddOp,
     MinusOp,
     MultOp,
     DivOp,
     AndOp,
     OrOp,
+    NotOp,
+    CompOp(String),
 }
 
 #[derive(Debug)]
@@ -246,7 +253,7 @@ impl Parser {
             }
             Token::kwIf(tab) => {
                 if(tab == self.tab){
-                    return Some(self.parse_if(tab));
+                    return Some(self.parse_if());
                 }else{
                     return None;
                 }
@@ -261,6 +268,13 @@ impl Parser {
             Token::kwPrint(tab) => {
                 if(tab == self.tab){
                     return Some(self.parse_print(tab));
+                }else{
+                    return None;
+                }
+            }
+            Token::kwEqual(tab) => {
+                if(tab == self.tab){
+                    return Some(self.parse_set());
                 }else{
                     return None;
                 }
@@ -283,22 +297,87 @@ impl Parser {
         ASTNode::Return(exp)
     }
 
-    fn parse_if(&mut self, tab: i32) -> ASTNode {
+    fn parse_if(&mut self) -> ASTNode {
         self.pos+=1;
-        let condition = self.parse_exp().expect("Expected condition for if statement");
-        let mut then_branch = Vec::new();
 
+        let condition;
         if let Token::lParen = self.tokens[self.pos].clone() {
-            while let Some(stmt) = self.parse_stmt() {
-                then_branch.push(stmt);
-            }
             self.pos+=1;
-            if let Token::rParen = self.tokens[self.pos].clone() {
-                return ASTNode::If(Box::new(condition), then_branch);
+            condition = self.parse_exp().expect("Failed to parse if statment: expected condition for if statement");
+            
+            if let Token::rParen = self.tokens[self.pos].clone(){
+                self.pos+=1;
+            }else{
+                panic!("Failed to parse if statemnet: missing right parenthesis for conditional");
+            }
+        }else{
+            panic!("Failed to parse if statment: missing left parenthisis for conditional");
+        }
+
+        let mut then_branch = Vec::new();
+	
+	self.tab+=1;
+        while let Some(stmt) = self.parse_stmt() {
+            then_branch.push(stmt);
+        }
+        self.tab-=1;
+
+        let mut elseStmts = Vec::new();
+            
+        while let Token::kwElIf(tab) = self.tokens[self.pos].clone(){
+            if(tab == self.tab){
+                elseStmts.push(self.parse_elif());
             }
         }
 
-        panic!("Failed to parse if statement");
+        if let Token::kwElse(tab) = self.tokens[self.pos].clone(){
+            if(tab == self.tab){
+                elseStmts.push(self.parse_else());
+            }
+        }
+
+        return ASTNode::If(Box::new(condition), then_branch, elseStmts);
+    }
+
+    fn parse_elif(&mut self) -> ASTNode {
+        self.pos += 1;
+
+        let condition;
+        if let Token::lParen = self.tokens[self.pos].clone(){
+            self.pos+=1;
+            condition = self.parse_exp().expect("Failed to parse elif statement: missing condition");
+
+            if let Token::rParen = self.tokens[self.pos].clone(){
+                self.pos+=1;
+            }else{
+                panic!("Failed to parse elif statement: missing right parenthesis for condition");
+            }
+        }else{
+            panic!("Failed to parse elif statement: missing left parenthesis for condition");
+        }
+        let mut then_branch = Vec::new();
+
+        self.tab+=1;
+        while let Some(stmt) = self.parse_stmt() {
+            then_branch.push(stmt);
+        }
+        self.tab-=1;
+        
+        return ASTNode::ElIf(Box::new(condition), then_branch);
+
+    }
+
+    fn parse_else(&mut self) -> ASTNode {
+        self.pos+=1;
+
+        let mut body = Vec::new();
+        self.tab+=1;
+        while let Some(stmt) = self.parse_stmt() {
+            body.push(stmt);
+        }
+        self.tab-=1;
+
+        return ASTNode::Else(body);
     }
 
     fn parse_while(&mut self, tab: i32) -> ASTNode {
@@ -317,6 +396,29 @@ impl Parser {
             return ASTNode::Print(Box::new(exp));
         }
         panic!("Failed to parse print statement");
+    }
+
+    fn parse_set(&mut self) -> ASTNode {
+        self.pos+=1;
+
+        let mut stmt = Vec::new();        
+
+        let var = self.tokens[self.pos].clone();
+        if let Token::Identifier(_) = var{
+            stmt.push(ASTNode::Var(var.toString()));
+            self.pos+=1;
+        }else{
+            panic!("Failed to parse set statement: need a variable to set");
+        }
+
+        if let Some(exp) = self.parse_exp(){
+            stmt.push(exp);
+            self.pos+=1;
+        }else{
+            panic!("Failed to parse set statement: need an expression to set the variable to");
+        }
+
+        return ASTNode::Set(stmt);
     }
 
     fn parse_exp(&mut self) -> Option<ASTNode> {
@@ -397,10 +499,32 @@ impl Parser {
                             panic!("missing the right parenthesis")
                         }
                     }
-                    _ => {panic!("not any known expression")}
+                    Some(Token::Not) => {
+                        self.pos+=1;
+                        let exp = Some(ASTNode::NotExp(vec![ASTNode::NotOp, self.parse_exp()?]));
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
+                            return exp;
+                        }else{
+                            panic!("missing to right parenthesis")
+                        }
+                    }
+                    Some(Token::Equals)|Some(Token::NotEquals)|Some(Token::Less)|Some(Token::Great)|Some(Token::LessEqual)|Some(Token::GreatEqual) => {
+                        let token = self.tokens[self.pos].clone();
+			self.pos+=1;
+
+                        let exp = Some(ASTNode::CompExp(vec![ASTNode::CompOp(token.toString()), self.parse_exp()?, self.parse_exp()?]));
+                        if let Token::rParen = self.tokens[self.pos].clone(){
+                            self.pos+=1;
+                            return exp;
+                        }else{
+                            panic!("missing the right parenthesis")
+                        }
+                    }
+                    _ => {panic!("not any known expression: {}", self.tokens[self.pos].toString())}
                 }
             }
-            _ => {panic!("not any known expression")}
+            _ => {panic!("not any known expression: {}", self.tokens[self.pos].toString())}
         }
         None // temp for now
     }

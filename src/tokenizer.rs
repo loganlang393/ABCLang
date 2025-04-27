@@ -115,11 +115,45 @@ impl Tokenizer {
                 }
                 '=' => {
                     self.forwardTokes();
-                    Some(Token::Equal)
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::Equals)
+                    }else{
+                        let currTab = self.tab.clone();
+                        self.tab = 0;
+                        Some(Token::kwEqual(currTab))
+                    }
+                }
+                '!' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::NotEquals)
+                    }else{
+                        Some(Token::Not)
+                    }
                 }
                 ';' => {
                     self.forwardTokes();
                     Some(Token::Semicolon)
+                }
+                '<' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::LessEqual)
+                    }else{
+                        Some(Token::Less)
+                    }
+                }
+                '>' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::GreatEqual)
+                    }else{
+                        Some(Token::Great)
+                    }
                 }
                 _ => {
                     
@@ -165,6 +199,16 @@ impl Tokenizer {
                                 let currTab = self.tab.clone();
                                 self.tab = 0;
                                 return Some(Token::kwIf(currTab));
+                            }
+                            "elif" => {
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwElIf(currTab));
+                            }
+                            "else" => {
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwElse(currTab));
                             }
                             "while" => {
                                 let currTab = self.tab.clone();
