@@ -130,14 +130,6 @@ impl Parser {
                                     break;
                                 }
                             }
-                            Token::kwVarDec(tab) => {
-                                if(tab == self.tab){
-                                    self.pos+=1;
-                                    body.push(self.parse_var_dec(tab));
-                                }else{
-                                    break;
-                                }
-                            }
                             _ => {
                                 break;
                             }

@@ -19,8 +19,9 @@ impl CodeGenerator{
     }
 
     pub fn generate(&mut self){
-        writeln!(self.file, "include <stdio.h>");
-        writeln!(self.file, "#include<string.h>");
+        writeln!(self.file, "#include <stdio.h>");
+        writeln!(self.file, "#include <string.h>");
+        writeln!(self.file, "#include <stdbool.h>");
 
         if let ASTNode::Program(nodes) = self.program.clone(){
             while self.pos < nodes.len(){
@@ -45,6 +46,9 @@ impl CodeGenerator{
     pub fn generate_struct(&mut self, structure: ASTNode){
         if let ASTNode::StructDef(name, parameters, body) = structure{
             writeln!(self.file, "typedef struct {");
+            for param in parameters{
+            
+            }
             writeln!(self.file, "} {};", name);
         } 
     }
