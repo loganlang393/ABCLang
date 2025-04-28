@@ -14,7 +14,7 @@ pub enum ASTNode {
     If(Box<ASTNode>, Vec<ASTNode>, Vec<ASTNode>),
     ElIf(Box<ASTNode>, Vec<ASTNode>),
     Else(Vec<ASTNode>),
-    While(Box<ASTNode>, Box<ASTNode>),
+    While(Box<ASTNode>, Vec<ASTNode>),
     Print(Box<ASTNode>),
     Return(Option<Box<ASTNode>>),
     Block(Vec<ASTNode>),
@@ -83,7 +83,6 @@ impl Parser {
                 _ => {
                     // literally everything else
                     if let Some(node) = self.parse_stmt() {
-                        self.pos+=1;
                         nodes.push(node);
                     }else{
                         panic!("Can't parse {}", self.tokens[self.pos].clone().toString());
@@ -272,7 +271,7 @@ impl Parser {
                     return None;
                 }
             }
-            Token::kwEqual(tab) => {
+            Token::kwSet(tab) => {
                 if(tab == self.tab){
                     return Some(self.parse_set());
                 }else{
@@ -385,9 +384,14 @@ impl Parser {
         let condition = self.parse_exp().expect("Expected condition for while statement");
 
         // Store the body statement in a local variable
-        let body = self.parse_stmt().expect("Failed to parse while body");
+        let mut body = Vec::new();
+        self.tab += 1;
+        while let Some(stmt) = self.parse_stmt() {
+            body.push(stmt);
+        }
+        self.tab -= 1;
         
-        ASTNode::While(Box::new(condition), Box::new(body))
+        ASTNode::While(Box::new(condition), body)
     }
 
     fn parse_print(&mut self, tab: i32) -> ASTNode {
@@ -509,13 +513,15 @@ impl Parser {
                             panic!("missing to right parenthesis")
                         }
                     }
-                    Some(Token::Equals)|Some(Token::NotEquals)|Some(Token::Less)|Some(Token::Great)|Some(Token::LessEqual)|Some(Token::GreatEqual) => {
+                    Some(Token::Equals) | Some(Token::NotEquals) | Some(Token::Less) | Some(Token::Great) | Some(Token::LessEqual) | Some(Token::GreatEqual) => {
                         let token = self.tokens[self.pos].clone();
+                        println!("comparison operator {}", token.toString());
 			self.pos+=1;
 
                         let exp = Some(ASTNode::CompExp(vec![ASTNode::CompOp(token.toString()), self.parse_exp()?, self.parse_exp()?]));
                         if let Token::rParen = self.tokens[self.pos].clone(){
                             self.pos+=1;
+                            println!("current token {}", self.tokens[self.pos].clone().toString());
                             return exp;
                         }else{
                             panic!("missing the right parenthesis")

@@ -119,9 +119,7 @@ impl Tokenizer {
                         self.forwardTokes();
                         Some(Token::Equals)
                     }else{
-                        let currTab = self.tab.clone();
-                        self.tab = 0;
-                        Some(Token::kwEqual(currTab))
+                        panic!("unrechognized token")
                     }
                 }
                 '!' => {
@@ -234,6 +232,11 @@ impl Tokenizer {
                             }
                             "or" =>{
                                 return Some(Token::Or);
+                            }
+                            "set" =>{
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwSet(currTab));
                             }
                             num if num.chars().all(|c| c.is_numeric()) => {
                                 return Some(Token::Integer(num.parse().unwrap()));

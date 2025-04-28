@@ -163,4 +163,55 @@ mod tests {
 
         let ast = parser.parse();
     }
+
+    #[test]
+    fn test_comparison_expressions(){
+        let input = "println (> 4 5) \n println (>= 5 4) \n println (< 5 4) \n println (<= 5 4) \n println (== 5 4) \n println (!= 5 4)";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_return_statement(){
+        let input = "return 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+ 
+        let ast = parser.parse();
+    }
+ 
+    #[test]
+    fn test_AND_OR_expressions(){
+        let input = "return (and (== 5 4) (> 5 4)) \n return (or (== 5 4) (> 5 4))";
+        
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_while_statement(){
+        let input = "while (!(> x 5)) \n \t println 5 \n \t println x";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_set_statment(){
+        let input = "set x 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
 }

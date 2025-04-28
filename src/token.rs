@@ -26,7 +26,7 @@ pub enum Token {
     kwBlock,
     kwCall,
     kwNew,
-    kwEqual(i32),
+    kwSet(i32),
     // opps
     lParen,
     rParen,
@@ -77,7 +77,7 @@ impl Token {
             Token::kwBlock => "block".to_string(),
             Token::kwCall => "call".to_string(),
             Token::kwNew => "new".to_string(),
-            Token::kwEqual(i32) => "=".to_string(),
+            Token::kwSet(i32) => "set".to_string(),
             Token::lParen => "(".to_string(),
             Token::rParen => ")".to_string(),
             Token::Plus => "+".to_string(),
