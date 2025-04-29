@@ -4,12 +4,15 @@ use crate::tokenizer::Tokenizer;
 use std::process;
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub enum ASTNode {
     Program(Vec<ASTNode>),
     StructDef(String, Vec<Param>, Vec<ASTNode>),
     FuncDef(String, Vec<Param>, String, Vec<ASTNode>),
     VarDec(String, String, Box<ASTNode>),
     Var(String),
+    Func(String, Vec<ASTNode>),
+    Struct(String, Vec<ASTNode>),
     Assignment(Box<ASTNode>, Box<ASTNode>),
     If(Box<ASTNode>, Vec<ASTNode>, Vec<ASTNode>),
     ElIf(Box<ASTNode>, Vec<ASTNode>),
@@ -42,19 +45,23 @@ pub enum ASTNode {
 }
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub struct Param {
+    var_type: String,
     var: String, 
 }
 
 pub struct Parser {
     tokens: Vec<Token>,
+    funcs: Vec<ASTNode>,
+    strucs: Vec<ASTNode>,
     pos: usize,
     tab: i32,
 }
 
 impl Parser {
     pub fn new(mut tokenizer: Tokenizer) -> Self{
-        Parser { tokens: tokenizer.tokenize(), pos: 0, tab:0 }
+        Parser { tokens: tokenizer.tokenize(), funcs: Vec::new(), strucs: Vec::new(), pos: 0, tab:0 }
     }
 
     pub fn parse(&mut self) -> ASTNode {
@@ -137,6 +144,7 @@ impl Parser {
                     }
 
                     self.tab -= 1;
+                    self.strucs.push(ASTNode::StructDef(name.clone(), params.clone(), body.clone()));
                     return ASTNode::StructDef(name, params, body);
                 }else{
                     panic!("Failed to parse struct definition: no right parenthisis for parameters");
@@ -161,7 +169,7 @@ impl Parser {
 
         if let Token::Identifier(var_name) = self.tokens[self.pos].clone() {
             self.pos+=1;
-            return Some(Param { var: var_name});
+            return Some(Param {var_type: param_type, var: var_name});
         }else{
             panic!("no parameter identifier");
         }
@@ -198,6 +206,7 @@ impl Parser {
                     }
                     self.tab -= 1;
                     //println!("{}", self.tab);
+                    self.funcs.push(ASTNode::FuncDef(name.clone(), params.clone(), ret_type.clone(), body.clone()));
                     return ASTNode::FuncDef(name, params, ret_type, body);
                 }else{
                     panic!("Failed to parse function definition: no right parenthesis");
@@ -426,6 +435,30 @@ impl Parser {
             }
             Some(Token::Identifier(name)) => {
                 self.pos+=1;
+                if let Token::lParen = self.tokens[self.pos].clone(){
+                    self.pos+=1;
+
+                    let mut params = Vec::new();
+                    while self.tokens[self.pos].clone() != Token::rParen{
+                        params.push(self.parse_exp()?);
+                    }
+
+                    for x in 0..self.strucs.len(){
+                        if let ASTNode::StructDef(struct_name, struct_params, _) = &self.strucs[x]{
+                            if name == *struct_name && params.clone().len() == struct_params.len(){
+                                return Some(ASTNode::Struct(struct_name.to_string(), params));
+                            }
+                        }
+                    }
+                    
+                    for x in 0..self.funcs.len(){
+                        if let ASTNode::FuncDef(func_name, func_params, _, _) = &self.funcs[x]{
+                            if name == *func_name && params.clone().len() == func_params.len(){
+                                return Some(ASTNode::Func(func_name.to_string(), params));
+                            }
+                        }
+                    }
+                }
                 return Some(ASTNode::Var(name));
             }
             Some(Token::Bool(bool)) => {
