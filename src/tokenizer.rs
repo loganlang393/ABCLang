@@ -6,6 +6,7 @@ pub struct Tokenizer{
     tokes: Vec<char>, //Vec<char> cause I need indexing
     pos: usize,
     eof_flag: bool,
+    tab: i32,
 }
 
 impl Tokenizer {
@@ -14,7 +15,18 @@ impl Tokenizer {
             tokes: tokes.chars().collect(),// converts that string into vec<char>
             pos: 0, //position starts on 0
             eof_flag: false,
+            tab: 0,
         }
+    }
+
+    pub fn tokenize(&mut self) -> Vec<Token>{
+        let mut tokens = Vec::new();
+        
+        while let Some(curr) = self.readToken(){
+            tokens.push(curr);
+        }
+
+        return tokens;
     }
     
     // Returns index of token
@@ -25,7 +37,9 @@ impl Tokenizer {
     //Skips whitespace
     fn skips (&mut self) {
         while let Some(curr) = self.currPosition(){
-            if !curr.is_whitespace(){
+            if curr == '\t'{
+                self.tab += 1;
+            }else if !curr.is_whitespace(){
                 break;
             } 
             self.forwardTokes();
@@ -61,7 +75,6 @@ impl Tokenizer {
             if curr.is_alphanumeric() { //identifiers only characters and number)
                 identifier.push(curr);
                 self.forwardTokes();
-                
             } else{
                 break;
             }
@@ -77,28 +90,68 @@ impl Tokenizer {
         match self.currPosition() {
             Some(curr) => match curr {
                 '(' => {
+                    self.forwardTokes();
                     Some(Token::lParen)
                 }
                 ')' => {
+                    self.forwardTokes();
                     Some(Token::rParen)
                 }
                 '+' => {
+                    self.forwardTokes();
                     Some(Token::Plus)
                 }
                 '-' => {
+                    self.forwardTokes();
                     Some(Token::Minus)
                 }
                 '*' => {
+                    self.forwardTokes();
                     Some(Token::Star)
                 }
                 '/' => {
+                    self.forwardTokes();
                     Some(Token::Div)
                 }
                 '=' => {
-                    Some(Token::Equal)
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::Equals)
+                    }else{
+                        panic!("unrechognized token")
+                    }
+                }
+                '!' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::NotEquals)
+                    }else{
+                        Some(Token::Not)
+                    }
                 }
                 ';' => {
+                    self.forwardTokes();
                     Some(Token::Semicolon)
+                }
+                '<' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::LessEqual)
+                    }else{
+                        Some(Token::Less)
+                    }
+                }
+                '>' => {
+                    self.forwardTokes();
+                    if(self.currPosition()? == '='){
+                        self.forwardTokes();
+                        Some(Token::GreatEqual)
+                    }else{
+                        Some(Token::Great)
+                    }
                 }
                 _ => {
                     
@@ -106,7 +159,9 @@ impl Tokenizer {
                     if let Token::Identifier(ref id) = identifier {
                         match id.as_str() {
                             "println" => {
-                                return Some(Token::kwPrint);
+                                let currTab = self.tab;
+                                self.tab = 0;
+                                return Some(Token::kwPrint(currTab));
                             }
                             "int" => {
                                 return Some(Token::kwInt);
@@ -124,22 +179,44 @@ impl Tokenizer {
                                 return Some(Token::kwStruct);
                             }
                             "func" => {
-                                return Some(Token::kwFunc);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwFunc(currTab));
                             }
                             "break" => {
-                                return Some(Token::kwBreak);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwBreak(currTab));
                             }
                             "return" => {
-                                return Some(Token::kwReturn);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwReturn(currTab));
                             }
                             "if" => {
-                                return Some(Token::kwIf);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwIf(currTab));
+                            }
+                            "elif" => {
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwElIf(currTab));
+                            }
+                            "else" => {
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwElse(currTab));
                             }
                             "while" => {
-                                return Some(Token::kwWhile);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwWhile(currTab));
                             }
                             "vardec" => {
-                                return Some(Token::kwVarDec);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwVarDec(currTab));
                             }
                             "block" => {
                                 return Some(Token::kwBlock);
@@ -156,8 +233,13 @@ impl Tokenizer {
                             "or" =>{
                                 return Some(Token::Or);
                             }
-                            "\t" =>{
-                                return Some(Token::Tab);
+                            "set" =>{
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::kwSet(currTab));
+                            }
+                            num if num.chars().all(|c| c.is_numeric()) => {
+                                return Some(Token::Integer(num.parse().unwrap()));
                             }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   
@@ -166,11 +248,8 @@ impl Tokenizer {
                     }
                     Some(identifier)
                 }
-                _ if curr.is_digit(10) => Some(self.readInteger()),
-                _ if curr.is_alphanumeric() => Some(self.identifiers()),
                 _ => {
-                    self.forwardTokes(); // Skip over unrecognized characters
-                    None // Unknown character, could return an error token or None
+                    panic!("unrechognized token") // Unknown character, could return an error token or None
                 }
             },
             None =>{ 
