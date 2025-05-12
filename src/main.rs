@@ -7,7 +7,7 @@ use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
 
 fn main() {
-    let input = "if ((> 5 4)) \n \t println 5 \n elif ((> 5 3)) \n \t println 3 \n else \n \t println 4";
+    let input = "struct test() \n vardec int x test()";
 
     let mut tokenizer = Tokenizer::newToken(input);
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
@@ -208,6 +208,37 @@ mod tests {
     #[test]
     fn test_set_statment(){
         let input = "set x 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_set_to_structure(){
+        let input = "struct test() \n vardec int x test()";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_set_to_function(){
+        let input = "func test() int \n vardec int x test()";
+        
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    #[should_panic(expected="Failed to parse expression: unknown structure or function call")]
+    fn test_incorrect_set_to_function(){
+        let input = "func test() int \n vardec int x test(0)";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);

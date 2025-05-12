@@ -446,7 +446,12 @@ impl Parser {
                     for x in 0..self.strucs.len(){
                         if let ASTNode::StructDef(struct_name, struct_params, _) = &self.strucs[x]{
                             if name == *struct_name && params.clone().len() == struct_params.len(){
-                                return Some(ASTNode::Struct(struct_name.to_string(), params));
+                                if let Token::rParen = self.tokens[self.pos].clone(){
+                                    self.pos+=1;
+                                    return Some(ASTNode::Struct(struct_name.to_string(), params));
+                                }else{
+                                    panic!("Failed to parse structure call: missing right parenthesis");
+                                }
                             }
                         }
                     }
@@ -454,10 +459,16 @@ impl Parser {
                     for x in 0..self.funcs.len(){
                         if let ASTNode::FuncDef(func_name, func_params, _, _) = &self.funcs[x]{
                             if name == *func_name && params.clone().len() == func_params.len(){
-                                return Some(ASTNode::Func(func_name.to_string(), params));
+                                if let Token::rParen = self.tokens[self.pos].clone(){
+                                    self.pos+=1;
+                                    return Some(ASTNode::Func(func_name.to_string(), params));
+                                }else{ 
+                                    panic!("Failed to parse function call: missing right parenthesis");
+                                }
                             }
                         }
                     }
+                    panic!("Failed to parse expression: unknown structure or function call");
                 }
                 return Some(ASTNode::Var(name));
             }
