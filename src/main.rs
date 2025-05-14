@@ -10,11 +10,15 @@ use std::fs; //import for File Reading
 
 
 fn main() {
+<<<<<<< HEAD
   let args: Vec<String> = env::args().collect();
     let file = &args[1];
     let input = fs::read_to_string(file).expect("Should be a file");
     println!("Text:\n{input}");
     //let input = "if ((> 5 4)) \n \t println 5 \n elif ((> 5 3)) \n \t println 3 \n else \n \t println 4";
+=======
+    let input = "struct test() \n vardec int x test()";
+>>>>>>> origin/logan
 
     let mut tokenizer = Tokenizer::newToken(input.as_str());
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
@@ -215,6 +219,37 @@ mod tests {
     #[test]
     fn test_set_statment(){
         let input = "set x 5";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_set_to_structure(){
+        let input = "struct test() \n vardec int x test()";
+
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_set_to_function(){
+        let input = "func test() int \n vardec int x test()";
+        
+        let mut tokenizer = Tokenizer::newToken(input);
+        let mut parser = Parser::new(tokenizer);
+
+        let ast = parser.parse();
+    }
+
+    #[test]
+    #[should_panic(expected="Failed to parse expression: unknown structure or function call")]
+    fn test_incorrect_set_to_function(){
+        let input = "func test() int \n vardec int x test(0)";
 
         let mut tokenizer = Tokenizer::newToken(input);
         let mut parser = Parser::new(tokenizer);

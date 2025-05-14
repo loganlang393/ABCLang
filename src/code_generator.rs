@@ -24,6 +24,8 @@ impl CodeGenerator{
         writeln!(self.file, "#include <stdlib.h>");
         writeln!(self.file, "#include <stdbool.h>");
 
+        generate_garbage_collector();
+
         if let ASTNode::Program(nodes) = self.program.clone(){
             while self.pos < nodes.len(){
                 match nodes[self.pos]{
@@ -46,6 +48,39 @@ impl CodeGenerator{
                 }
             }
         }
+    }
+
+    pub fn generate_garbage_collector(&mut self){
+        writeln!("typedef struct MarkRefs MarkRefs");
+        writeln!("typedef struct Reference Reference;");
+        writeln!("typedef struct Heap Heap;");
+
+        writeln!("struct Reference{");
+        writeln!("\tchar* object_lacation;");
+        writeln!("\tsize_t object_size;");
+        writeln!("\tMarkRefs children;");
+        writeln!("\tbool allocated;");
+        writeln!("\tbool mark;");
+        writeln!("};\n");
+
+        writeln!("struct Heap{");
+        writeln!("\tchar* start;");
+        writeln!("\tchar* mid;");
+        writeln!("\tchar* bump-pointer;");
+        writeln!("\tbool on-start;");
+        writeln!("\tsize_t total_heap_size;");
+        writeln!("\tsize_t current_heap_max;");
+        writeln!("\tsize_t current_allocated_size;");
+        writeln!("\tReference* entries;");
+        writeln!("\tsize_t total_num_entries;");
+        writeln!("};\n");
+        
+        writeln!("Reference gc_allocate(struct Heap* h, size_t s, MarkRefs mc){");
+        writeln!("\tif (h.current_allocated_size + s <= h.current_heap_max){");
+        writeln!("\t\tReference entry = {h.bump-pointer, s, mc, true, true}");
+        writeln!("\t\th.current_allocated_size += s;");
+        writeln!("\t\th.bump-pointer += s;");
+        writeln!("}\n");
     }
 
     pub fn generate_struct(&mut self, structure: ASTNode){
