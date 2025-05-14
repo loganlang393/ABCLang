@@ -2,28 +2,30 @@
 mod token;
 mod tokenizer;
 mod parser; // Include the parser module
+mod code_generator;
 
 use tokenizer::Tokenizer;
 use parser::Parser; // Import the Parser struct
+use code_generator::CodeGenerator;
 use std::env; // Import for command line arguments
 use std::fs; //import for File Reading
 
 
 fn main() {
-<<<<<<< HEAD
   let args: Vec<String> = env::args().collect();
     let file = &args[1];
+    let outputfile = &args[2];
     let input = fs::read_to_string(file).expect("Should be a file");
-    println!("Text:\n{input}");
-    //let input = "if ((> 5 4)) \n \t println 5 \n elif ((> 5 3)) \n \t println 3 \n else \n \t println 4";
-=======
-    let input = "struct test() \n vardec int x test()";
->>>>>>> origin/logan
+    let output = outputfile.as_str();
+//    println!("Text:\n{input}");
+//  let input = "if ((> 5 4)) \n \t println 5 \n elif ((> 5 3)) \n \t println 3 \n else \n \t println 4";
 
     let mut tokenizer = Tokenizer::newToken(input.as_str());
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
-
-    let mut ast = parser.parse();
+    let ast = parser.parse();
+    
+    let mut codeGenerator = CodeGenerator::new(ast.clone(), output);
+    codeGenerator.generate();
 
     println!("{:#?}", ast);
 }

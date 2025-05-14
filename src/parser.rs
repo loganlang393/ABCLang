@@ -14,6 +14,7 @@ pub enum ASTNode {
     Func(String, Vec<ASTNode>),
     Struct(String, Vec<ASTNode>),
     Assignment(Box<ASTNode>, Box<ASTNode>),
+    PropertyAccess(Box<ASTNode>, String),
     If(Box<ASTNode>, Vec<ASTNode>, Vec<ASTNode>),
     ElIf(Box<ASTNode>, Vec<ASTNode>),
     Else(Vec<ASTNode>),
@@ -47,8 +48,8 @@ pub enum ASTNode {
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Param {
-    var_type: String,
-    var: String, 
+    pub var_type: String,
+    pub var: String, 
 }
 
 pub struct Parser {
