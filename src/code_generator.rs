@@ -90,19 +90,83 @@ impl CodeGenerator {
         writeln!(self.file, "\tbool on_start;").unwrap();
         writeln!(self.file, "\tsize_t total_heap_size;").unwrap();
         writeln!(self.file, "\tsize_t current_heap_max;").unwrap();
-        writeln!(self.file, "\tsize_t current_allocated_size;").unwrap();
         writeln!(self.file, "\tReference* entries;").unwrap();
         writeln!(self.file, "\tsize_t total_num_entries;").unwrap();
+        writeln!(self.file, "\tsize_t num_entries;").unwrap();
         writeln!(self.file, "}};\n").unwrap();
 
-        // gc_allocate function
-        writeln!(self.file, "Reference gc_allocate(struct Heap* h, size_t s, MarkRefs* mc) {{").unwrap();
-        writeln!(self.file, "\tif (h->current_allocated_size + s <= h->current_heap_max) {{").unwrap();
-        writeln!(self.file, "\t\tReference entry = {{h->bump_pointer, s, mc, true, true}};").unwrap();
-        writeln!(self.file, "\t\th->current_allocated_size += s;").unwrap();
-        writeln!(self.file, "\t\th->bump_pointer += s;").unwrap();
-        writeln!(self.file, "\t\treturn entry;").unwrap();
+        //gc_reallocate function
+        writeln!(self.file, "void gc_reallocate(struct Heap* h) {{").unwrap();
+        writeln!(self.file, "\tif(h->on_start) {{").unwrap();
+        writeln!(self.file, "\t\th->on_start = false;").unwrap();
+        writeln!(self.file, "\t\th->bump_pointer = h->mid;").unwrap();
+        writeln!(self.file, "\t}}else {{").unwrap();
+        writeln!(self.file, "\t\th->on_start = true;").unwrap();
+        writeln!(self.file, "\t\th->bump_pointer = h->start;").unwrap();
         writeln!(self.file, "\t}}").unwrap();
+        writeln!(self.file, "\tReference* current_list = h->entries;").unwrap();
+        writeln!(self.file, "\th->entries = malloc(sizeof(Reference) * h->total_num_entries);").unwrap();
+        writeln!(self.file, "\tfor(size_t i = 0; i < h->total_num_entries; i++) {{").unwrap();
+        writeln!(self.file, "\t\tif(current_list[i]->mark) {{").unwrap();
+        writeln!(self.file, "\t\t\th->entries[h->num_entries] = *gc_allocate(h, current_list[i]->object_size, current_list[i]->children);").unwrap();
+        writeln!(self.file, "\t\t\tfree(current_list[i]);").unwrap();
+        writeln!(self.file, "\t\t\tcurrent_list[i] = NULL").unwrap();
+        writeln!(self.file, "\t\t}}else {{").unwrap();
+        writeln!(self.file, "\t\t\tfree(current_list[i]);").unwrap();
+        writeln!(self.file, "\t\t\tcurrent_list[i] = NULL;").unwrap();
+        writeln!(self.file, "\t\t}}").unwrap();
+        writeln!(self.file, "\t}}").unwrap();
+        writeln!(self.file, "\tfree(current_list);").unwrap();
+        writeln!(self.file, "\tcurrent_list = NULL").unwrap();
+        writeln!(self.file, "}}\n").unwrap();
+
+        // gc_allocate function
+        writeln!(self.file, "Reference* gc_allocate(struct Heap* h, size_t s, MarkRefs* mc) {{").unwrap();
+        writeln!(self.file, "\tif(h->on_start) {{").unwrap();
+        writeln!(self.file, "\t\tif (h->bump_pointer + s <= h->mid) {{").unwrap();
+        writeln!(self.file, "\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
+        writeln!(self.file, "\t\t\t\tgc_reallocate(&h);").unwrap();
+        writeln!(self.file, "\t\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn NULL;").unwrap();
+        writeln!(self.file, "\t\t\t\t}} else {{").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\t\t}}").unwrap();
+        writeln!(self.file, "\t\t\t}}").unwrap();
+        writeln!(self.file, "\t\t\tReference entry = {{h->bump_pointer, s, mc, true, true}};").unwrap();
+        writeln!(self.file, "\t\t\th->entries[num_entries] = entry;").unwrap();
+        writeln!(self.file, "\t\t\th->num_entries++;").unwrap();
+        writeln!(self.file, "\t\t\th->bump_pointer += s;").unwrap();
+        writeln!(self.file, "\t\t\treturn &entry;").unwrap();
+        writeln!(self.file, "\t\t}} else {{").unwrap();
+        writeln!(self.file, "\t\t\tgc_reallocate(&h);").unwrap();
+        writeln!(self.file, "\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t}}").unwrap();
+        writeln!(self.file, "\t}} else {{").unwrap();
+        writeln!(self.file, "\t\tif (h->bump_pointer + s <= h->total_heap_size) {{").unwrap();
+        writeln!(self.file, "\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
+        writeln!(self.file, "\t\t\t\tgc_reallocate(&h);").unwrap();
+        writeln!(self.file, "\t\t\t\tif (h->num_entries == h-> total_num_entries) {{").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn NULL;").unwrap();
+        writeln!(self.file, "\t\t\t\t}} else {{").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\t\t}}").unwrap();
+        writeln!(self.file, "\t\t\t}}").unwrap();
+        writeln!(self.file, "\t\t\tReference entry = {{h->bump_pointer, s, mc, true, true}};").unwrap();
+        writeln!(self.file, "\t\t\th->num_entries++;").unwrap();
+        writeln!(self.file, "\t\t\th->bump_pointer += s;").unwrap();
+        writeln!(self.file, "\t\t\treturn &entry;").unwrap();
+        writeln!(self.file, "\t\t}} else {{").unwrap();
+        writeln!(self.file, "\t\t\tgc_reallocate(&h);").unwrap();
+        writeln!(self.file, "\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t}}").unwrap();
+        writeln!(self.file, "\t}}").unwrap();
+        writeln!(self.file, "}}").unwrap();
+
+	// gc_deallocate function
+	writeln!(self.file, "void gc_deallocate(struct Heap* h, Reference reference) {{").unwrap();
+        writeln!(self.file, "\th->current_allocated_size -= reference->object_size;").unwrap();
+        writeln!(self.file, "\treference->mark=false;").unwrap();
+        writeln!(self.file, "}}").unwrap();
     }
 
     fn generate_struct(&mut self, structure: ASTNode) {
