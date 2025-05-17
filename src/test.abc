@@ -1,0 +1,13 @@
+struct test( int x bool y )
+	func test( int z ) void
+		println 5
+		while (> z 5)
+			println z
+
+func main() int
+	if ((> 5 4))
+		println 5
+	elif ((> 5 3))
+		println 3
+	else
+		println 4

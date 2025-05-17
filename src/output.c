@@ -101,3 +101,28 @@ void gc_deallocate(struct Heap* h, Reference reference) {
 	h->current_allocated_size -= reference->object_size;
 	reference->mark=false;
 }
+typedef struct test {
+	int x;
+	bool y;
+} test;
+
+void test(test* &s, int z) {
+	printf("%d\n", 5);
+	while (z > 5) {
+		printf("%d\n", z);
+	}
+}
+
+int main() {
+	char* heap_list = malloc(sizeof(char) * 1024);
+	Heap heap = {heap_list, &heap_list[511], &heap_list[0], true, &heap_list[1023], 1024, malloc(sizeof(Reference) * 50), 0}
+	if (5 > 4) {
+		printf("%d\n", 5);
+	}
+	else if (5 > 3) {
+		printf("%d\n", 3);
+	}
+	else {
+		printf("%d\n", 4);
+	}
+}

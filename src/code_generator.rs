@@ -231,7 +231,7 @@ impl CodeGenerator {
                 .join(", ");
             let indent = "\t";
 
-            writeln!(self.file, "{}{} {}({}) {{", indent, ret_type, name, params_str).unwrap();
+            writeln!(self.file, "{} {}({}) {{", ret_type, name, params_str).unwrap();
 
             let mut func_structs = Vec::new();
 
@@ -251,7 +251,7 @@ impl CodeGenerator {
             }
 
             self.tab -= 1;
-            writeln!(self.file, "{}}}\n", indent).unwrap();
+            writeln!(self.file, "}}\n").unwrap();
         }
     }
 
