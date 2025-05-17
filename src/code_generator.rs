@@ -472,8 +472,20 @@ impl CodeGenerator {
              
         // Generate main body here or leave empty
         if let ASTNode::FuncDef(_, _, _, body) = node {
-            for stmt in body {
+            let mut func_structs = Vec::new();
+
+            for stmt in body {                                                                                                          
+                if let ASTNode::VarDec(_, var_type, _) = stmt.clone(){                                                                      
+                    if var_type != "int".to_string() || var_type != "bool".to_string(){                                                         
+                        func_structs.push(var_type.clone().to_string());                                                                        
+                        writeln!(self.file, "{}Reference {}_reference = gc_allocate(&{}, sizeof({}), NULL);", indent, var_type.clone(), self.heap, var_type.clone());
+                    }
+                }    
                 self.generate_stmt(stmt.clone());
+            }
+
+            for reference in func_structs{
+                writeln!(self.file, "{}gc_deallocate(&{}, {}_reference);",indent, self.heap, reference.to_string());
             }
         }
         self.tab -= 1;
