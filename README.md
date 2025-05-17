@@ -33,43 +33,43 @@ The following will be code snippets of the ABCLang:
 
 ### Compiling a blank file:
 
-![](20250517134323.png)
+![](images/20250517134323.png)
 
 
 Output:
 
 Upon comipling, the compiler will add all code regarding the garbage collector. Please note, **that all files will contain this** to avoid repetition I omitted this in the other images.
 
-![](20250517134506.png)
+![](images/20250517134506.png)
 
 ### Variable Declaration
 
 Currently, only boolean and ints are allowed:
 
-![](20250517141142.png)
+![](images/20250517141142.png)
 
 Output would be the following:
 
-![](20250517141201.png)
+![](images/20250517141201.png)
 
 ### Functions Calls
 
 Example of a println statement:
 
-![](20250517141309.png)
+![](images/20250517141309.png)
 
 Output:
 
-![](20250517141350.png)
+![](images/20250517141350.png)
 
 
 Example of a main method:
 
-![](20250517141550.png)
+![](images/20250517141550.png)
 
 output:
 
-![](20250517141646.png)
+![](images/20250517141646.png)
 
 
 
@@ -81,11 +81,11 @@ output:
 
 If variables are declared in a struct like the following:
 
-![](20250517141028.png)
+![](images/20250517141028.png)
 
 Then the compiler assumes the user wants the function and variable otuside the body like so:
 
-![](20250517141114.png)
+![](images/20250517141114.png)
 
 
 ## Limitations
