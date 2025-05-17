@@ -318,20 +318,7 @@ impl Parser {
 
     fn parse_if(&mut self) -> ASTNode {
         self.pos+=1;
-
-        let condition;
-        if let Token::lParen = self.tokens[self.pos].clone() {
-            self.pos+=1;
-            condition = self.parse_exp().expect("Failed to parse if statment: expected condition for if statement");
-            
-            if let Token::rParen = self.tokens[self.pos].clone(){
-                self.pos+=1;
-            }else{
-                panic!("Failed to parse if statemnet: missing right parenthesis for conditional");
-            }
-        }else{
-            panic!("Failed to parse if statment: missing left parenthisis for conditional");
-        }
+        let condition = self.parse_exp().expect("Failed to parse if statment: expected condition for if statement");
 
         let mut then_branch = Vec::new();
 	
@@ -359,21 +346,9 @@ impl Parser {
     }
 
     fn parse_elif(&mut self) -> ASTNode {
-        self.pos += 1;
-
-        let condition;
-        if let Token::lParen = self.tokens[self.pos].clone(){
-            self.pos+=1;
-            condition = self.parse_exp().expect("Failed to parse elif statement: missing condition");
-
-            if let Token::rParen = self.tokens[self.pos].clone(){
-                self.pos+=1;
-            }else{
-                panic!("Failed to parse elif statement: missing right parenthesis for condition");
-            }
-        }else{
-            panic!("Failed to parse elif statement: missing left parenthesis for condition");
-        }
+        self.pos+=1;
+        let condition = self.parse_exp().expect("Failed to parse elif statement: missing condition for elif statement");
+        
         let mut then_branch = Vec::new();
 
         self.tab+=1;
