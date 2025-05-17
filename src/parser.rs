@@ -43,6 +43,7 @@ pub enum ASTNode {
     OrOp,
     NotOp,
     CompOp(String),
+    Collect,
 }
 
 #[derive(Debug)]
@@ -293,6 +294,9 @@ impl Parser {
                 }else{
                     return None;
                 }
+            }
+            Token::Collect => {
+            	return Some(ASTNode::Collect);
             }
             // Add other statements as necessary
             _ => {return None}

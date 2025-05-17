@@ -80,6 +80,12 @@ impl CodeGenerator {
         writeln!(self.file, "typedef struct Reference Reference;").unwrap();
         writeln!(self.file, "typedef struct Heap Heap;\n").unwrap();
 
+        // MarkRefs struct, currently undeveloped as structures do not have the ability to store variables currently
+        writeln!(self.file, "struct MarkRefs {{").unwrap();
+        writeln!(self.file, "\tsize_t object_size;").unwrap();
+        writeln!(self.file, "\tbool allocated;").unwrap();
+        writeln!(self.file, "}};\n").unwrap();
+        
         // Reference struct
         writeln!(self.file, "struct Reference {{").unwrap();
         writeln!(self.file, "\tchar* object_location;").unwrap();
@@ -128,43 +134,58 @@ impl CodeGenerator {
         writeln!(self.file, "}}\n").unwrap();
 
         // gc_allocate function
-        writeln!(self.file, "Reference* gc_allocate(struct Heap* h, size_t s, MarkRefs* mc) {{").unwrap();
+        writeln!(self.file, "Reference gc_allocate(struct Heap* h, size_t s, MarkRefs* mc) {{").unwrap();
         writeln!(self.file, "\tif(h->on_start) {{").unwrap();
+
         writeln!(self.file, "\t\tif (h->bump_pointer + s <= h->mid) {{").unwrap();
+
         writeln!(self.file, "\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
         writeln!(self.file, "\t\t\t\tgc_reallocate(&h);").unwrap();
+
         writeln!(self.file, "\t\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
-        writeln!(self.file, "\t\t\t\t\treturn NULL;").unwrap();
+        writeln!(self.file, "\t\t\t\t\tRefernce entry = {{h->bump_pointer, s, mc, false, false}};").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn entry;").unwrap();
+
         writeln!(self.file, "\t\t\t\t}} else {{").unwrap();
-        writeln!(self.file, "\t\t\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn gc_allocate(&h, s, &mc);").unwrap();
         writeln!(self.file, "\t\t\t\t}}").unwrap();
         writeln!(self.file, "\t\t\t}}").unwrap();
+
         writeln!(self.file, "\t\t\tReference entry = {{h->bump_pointer, s, mc, true, true}};").unwrap();
         writeln!(self.file, "\t\t\th->entries[num_entries] = entry;").unwrap();
         writeln!(self.file, "\t\t\th->num_entries++;").unwrap();
         writeln!(self.file, "\t\t\th->bump_pointer += s;").unwrap();
-        writeln!(self.file, "\t\t\treturn &entry;").unwrap();
+        writeln!(self.file, "\t\t\treturn entry;").unwrap();
+
         writeln!(self.file, "\t\t}} else {{").unwrap();
         writeln!(self.file, "\t\t\tgc_reallocate(&h);").unwrap();
-        writeln!(self.file, "\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\treturn gc_allocate(&h, s, &mc);").unwrap();
         writeln!(self.file, "\t\t}}").unwrap();
+
         writeln!(self.file, "\t}} else {{").unwrap();
+
         writeln!(self.file, "\t\tif (h->bump_pointer + s <= h->total_heap_size) {{").unwrap();
+
         writeln!(self.file, "\t\t\tif (h->num_entries == h->total_num_entries) {{").unwrap();
         writeln!(self.file, "\t\t\t\tgc_reallocate(&h);").unwrap();
+
         writeln!(self.file, "\t\t\t\tif (h->num_entries == h-> total_num_entries) {{").unwrap();
+        writeln!(self.file, "\t\t\t\t\tReference entry = {{h->bump_pointer, s, mc, false, false}};").unwrap();
         writeln!(self.file, "\t\t\t\t\treturn NULL;").unwrap();
+
         writeln!(self.file, "\t\t\t\t}} else {{").unwrap();
-        writeln!(self.file, "\t\t\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\t\t\treturn gc_allocate(&h, s, &mc);").unwrap();
         writeln!(self.file, "\t\t\t\t}}").unwrap();
         writeln!(self.file, "\t\t\t}}").unwrap();
+
         writeln!(self.file, "\t\t\tReference entry = {{h->bump_pointer, s, mc, true, true}};").unwrap();
         writeln!(self.file, "\t\t\th->num_entries++;").unwrap();
         writeln!(self.file, "\t\t\th->bump_pointer += s;").unwrap();
         writeln!(self.file, "\t\t\treturn &entry;").unwrap();
+
         writeln!(self.file, "\t\t}} else {{").unwrap();
         writeln!(self.file, "\t\t\tgc_reallocate(&h);").unwrap();
-        writeln!(self.file, "\t\t\treturn *gc_allocate(&h, s, &mc);").unwrap();
+        writeln!(self.file, "\t\t\treturn gc_allocate(&h, s, &mc);").unwrap();
         writeln!(self.file, "\t\t}}").unwrap();
         writeln!(self.file, "\t}}").unwrap();
         writeln!(self.file, "}}").unwrap();

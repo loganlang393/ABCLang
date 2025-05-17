@@ -241,6 +241,9 @@ impl Tokenizer {
                             num if num.chars().all(|c| c.is_numeric()) => {
                                 return Some(Token::Integer(num.parse().unwrap()));
                             }
+                            "collect" =>{
+                                return Some(Token::Collect);
+                            }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   
                             }
