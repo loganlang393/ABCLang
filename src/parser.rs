@@ -54,8 +54,8 @@ pub struct Param {
 
 pub struct Parser {
     tokens: Vec<Token>,
-    funcs: Vec<ASTNode>,
-    strucs: Vec<ASTNode>,
+    pub funcs: Vec<ASTNode>,
+    pub strucs: Vec<ASTNode>,
     pos: usize,
     tab: i32,
 }
@@ -224,6 +224,20 @@ impl Parser {
         let param_type = match self.tokens[self.pos].clone() {
             Token::kwInt => "int".to_string(),
             Token::kwBool => "bool".to_string(),
+            Token::Identifier(name) => {
+                let mut var_type = "".to_string();
+                for x in 0..self.strucs.len(){
+                    if let ASTNode::StructDef(struct_name, _, _) = &self.strucs[x]{
+                            if name == *struct_name{
+                                var_type = name.to_string();
+                            }
+                        }
+                }
+                if var_type == ""{
+                    panic!("Unknown variable type {}", name)
+                }
+                var_type
+            }
             _ => panic!("Expected variable type"),
         };
         self.pos+=1;

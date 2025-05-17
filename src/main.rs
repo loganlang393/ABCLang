@@ -22,12 +22,9 @@ fn main() {
 
     let mut tokenizer = Tokenizer::newToken(input.as_str());
     let mut parser = Parser::new(tokenizer); // Create a new instance of the parser
-    let ast = parser.parse();
     
-    let mut codeGenerator = CodeGenerator::new(ast.clone(), output);
+    let mut codeGenerator = CodeGenerator::new(parser, output);
     codeGenerator.generate();
-
-    println!("{:#?}", ast);
 }
 
 #[cfg(test)]

@@ -1,4 +1,5 @@
 use crate::parser::{ASTNode, Param};
+use crate::parser::Parser;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
 
@@ -8,10 +9,13 @@ pub struct CodeGenerator {
     pos: usize,
     tab: usize,
     file: std::fs::File,
+    heap: String,
+    funcs: Vec<ASTNode>,
+    strucs: Vec<ASTNode>,
 }
 
 impl CodeGenerator {
-    pub fn new(ast: ASTNode, file_name: &str) -> Self {
+    pub fn new(mut parser: Parser, file_name: &str) -> Self {
         let file = OpenOptions::new()
             .write(true)
             .create(true)
@@ -19,10 +23,13 @@ impl CodeGenerator {
             .open(file_name)
             .expect("Failed to open output file");
         Self {
-            program: ast,
+            program: parser.parse(),
             pos: 0,
             tab: 0,
             file,
+            heap: "heap".to_string(),
+            funcs: parser.funcs,
+            strucs: parser.strucs,
         }
     }
 
@@ -246,13 +253,33 @@ impl CodeGenerator {
                 self.tab -= 1;
                 writeln!(self.file, "{}}}", indent).unwrap();
                 if !else_branch.is_empty() {
-                    writeln!(self.file, "{}else {{", indent).unwrap();
-                    self.tab += 1;
-                    for stmt in else_branch {
-                        self.generate_stmt(stmt.clone());
+                    for else_stmts in &else_branch.clone(){
+                        match else_stmts{
+                            ASTNode::ElIf(cond, elif_body) => {
+                                write!(self.file, "{}else if (", indent).unwrap();
+                                self.generate_exp(&*cond);
+                                writeln!(self.file, ") {{").unwrap();
+                                self.tab += 1;
+                                for stmt in elif_body {
+                                    self.generate_stmt(stmt.clone());
+                                }
+                                self.tab -= 1;
+                                writeln!(self.file, "{}}}", indent).unwrap();
+                            }
+                            ASTNode::Else(else_body) => {
+                                writeln!(self.file, "{}else {{", indent).unwrap();
+                                self.tab += 1;
+                                for stmt in else_body {
+                                    self.generate_stmt(stmt.clone());
+                                }
+                                self.tab -= 1;
+                                writeln!(self.file, "{}}}", indent).unwrap();
+                            }
+                            _ =>{
+                                panic!("Only else or elif statements can be generated");
+                            }
+                        }
                     }
-                    self.tab -= 1;
-                    writeln!(self.file, "{}}}", indent).unwrap();
                 }
             }
             ASTNode::While(cond, body) => {
