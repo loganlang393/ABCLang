@@ -235,6 +235,11 @@ impl CodeGenerator {
 
             self.tab += 1;
             for stmt in body {
+                if let ASTNode::VarDec(_, var_type, _) = stmt.clone(){
+                    if var_type != "int".to_string() || var_type != "bool".to_string(){
+                        writeln!(self.file, "{}gc_allocate(&{}, sizeof({}), NULL);", indent, self.heap, var_type).unwrap();
+                    }
+                }
                 self.generate_stmt(stmt.clone());
             }
             self.tab -= 1;
@@ -354,6 +359,22 @@ impl CodeGenerator {
             }
             ASTNode::Var(name) => {
                 write!(self.file, "{}", name).unwrap();
+            }
+            ASTNode::Struct(name, params) => {
+                write!(self.file, "{{"). unwrap();   
+
+                for x in params{
+                    self.generate_exp(x)
+                }
+                write!(self.file, "}}").unwrap();
+            }
+            ASTNode::Func(name, params) => {
+                write!(self.file, "{}(", name).unwrap();
+                
+                for x in params{
+                    self.generate_exp(x);
+                }
+                write!(self.file, ")").unwrap();
             }
             ASTNode::AddOrMinusExp(parts) => {
                 if parts.len() >= 3 {
