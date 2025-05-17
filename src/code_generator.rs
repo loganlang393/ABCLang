@@ -55,7 +55,7 @@ impl CodeGenerator {
                     ASTNode::FuncDef(_, _, _, _) => {
                         if let ASTNode::FuncDef(ref name, _, _, _) = node {
                             if name == "main" {
-                                self.generate_main();
+                                self.generate_main(node);
                             } else {
                                 self.generate_func(node);
                             }
@@ -101,8 +101,8 @@ impl CodeGenerator {
         writeln!(self.file, "\tchar* mid;").unwrap();
         writeln!(self.file, "\tchar* bump_pointer;").unwrap();
         writeln!(self.file, "\tbool on_start;").unwrap();
-        writeln!(self.file, "\tsize_t total_heap_size;").unwrap();
-        writeln!(self.file, "\tsize_t current_heap_max;").unwrap();
+        writeln!(self.file, "\tchar* total_heap_size;").unwrap();
+        writeln!(self.file, "\tchar* current_heap_max;").unwrap();
         writeln!(self.file, "\tReference* entries;").unwrap();
         writeln!(self.file, "\tsize_t total_num_entries;").unwrap();
         writeln!(self.file, "\tsize_t num_entries;").unwrap();
@@ -214,7 +214,9 @@ impl CodeGenerator {
             // Generate embedded functions if any
             for func in body {
                 if let ASTNode::FuncDef(func_name, params, ret_type, body) = func {
-                    self.generate_func(ASTNode::FuncDef(func_name.clone(), params.clone(), ret_type.clone(), body.clone()));
+                    let mut func_params = params.clone();
+                    func_params.insert(0, Param {var_type: format!("{}*", name), var: format!("&s")});
+                    self.generate_func(ASTNode::FuncDef(func_name.clone(), func_params.clone(), ret_type.clone(), body.clone()));
                 }
             }
         }
@@ -333,6 +335,9 @@ impl CodeGenerator {
                     }
                 }
             }
+            ASTNode::Collect =>{
+                writeln!(self.file, "gc_reallocate(&{});", self.heap).unwrap();
+            }
             _ => {
                 // Handle other statements if needed
             }
@@ -429,12 +434,20 @@ impl CodeGenerator {
         }
     }
 
-    fn generate_main(&mut self) {
+    fn generate_main(&mut self, node: ASTNode) {
         let indent = "\t";
         writeln!(self.file, "int main() {{").unwrap();
         self.tab += 1;
+        writeln!(self.file, "{}char* heap_list = malloc(sizeof(char) * 1024);", indent).unwrap();
+        writeln!(self.file, "{}Heap {} = {{heap_list, &heap_list[511], &heap_list[0], true, &heap_list[1023], 1024, malloc(sizeof(Reference) * 50), 0}}", indent, self.heap).unwrap();
+             
         // Generate main body here or leave empty
+        if let ASTNode::FuncDef(_, _, _, body) = node {
+            for stmt in body {
+                self.generate_stmt(stmt.clone());
+            }
+        }
         self.tab -= 1;
-        writeln!(self.file, "{}}}", indent).unwrap();
+        writeln!(self.file, "}}").unwrap();
     }
 }
