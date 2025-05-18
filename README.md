@@ -21,7 +21,7 @@ Now the difference between ABCLang and the original Reclaimer are the following:
 
 ABCLang is ideal for the following userbase:
 - Progammers transitioning from S-Expressions and non S-Expression syntax since ABCLang lies in between the two.
-- Programmers who prefer a slight higher level programming language since ABCLang allows for flexibility with memory management through its garbage collector.
+- Programmers who prefer a slightly higher level programming language since ABCLang allows for flexibility with memory management through its garbage collector.
 - Programmers who like to manage memory within their programs since ABCLang offers manual garbage collecting if needed.
 
 Overall, ABCLang is primarily designed for flexibility when it comes to memory management since the user has control on whether to depend on automatic garbage collecting, manual garbage collection, or both.
@@ -178,18 +178,16 @@ exp ::= i | `true` | `false` | Integers and booleans
         lhs | Something we can access
         
         Allocate a new struct
-        `(` `new` structname `(` struct_param* `)` `)` |
+        `(` structname `(` struct_param* `)` `)` |
 
         Function calls
-        `(` `call` funcname exp* `)`
+        `(` funcname exp* `)`
 
 stmt ::= `(` `vardec` type var exp `)` | Variable declaration
          `(` `=` lhs exp `)` | Assignment
          `(` `if` exp stmt [stmt] `)` | if
          `(` `while` exp stmt `)` | while
-         `break` | break
          `(` `println` exp `)` | Printing something
-         `(` `block` stmt* `)` | Block
          `(` `return` [exp] `)` | Return
          `(` `stmt` exp `)` Expression statements
 
