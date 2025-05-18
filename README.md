@@ -140,6 +140,9 @@ Second, set your directory to `src`:
 
 `cd src`
 
+Third, make sure to build the compiler:
+
+`cargo build`
 
 Afterwards, use the following command:
 
