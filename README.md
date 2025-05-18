@@ -31,6 +31,22 @@ Overall, ABCLang is primarily designed for flexibility when it comes to memory m
 
 The following will be code snippets of the ABCLang:
 
+### Ideal Composition for ABCLang
+
+The following ABCLang code snippet contains practically everything about our language: Structs, Variable Declaration, While Loops, Branches, Garbage Collecting.
+
+
+ABCLang: 
+
+![](images/20250517173444.png)
+
+
+Output C Code:
+
+![](images/20250517174252.png)
+
+
+
 ### Compiling a blank file:
 
 ![](images/20250517134323.png)
@@ -63,19 +79,7 @@ Output:
 ![](images/20250517141350.png)
 
 
-Example of a main method:
-
-![](images/20250517141550.png)
-
-output:
-
-![](images/20250517141646.png)
-
-
-
 ### Structs
-
-#### Correct Structs with Variable Declaration
 
 #### Incorrect Structs Variable Declaration
 
