@@ -352,7 +352,7 @@ impl CodeGenerator {
                 }
             }
             ASTNode::Collect =>{
-                writeln!(self.file, "gc_reallocate(&{});", self.heap).unwrap();
+                writeln!(self.file, "{}gc_reallocate(&{});", indent, self.heap).unwrap();
             }
             _ => {
                 // Handle other statements if needed

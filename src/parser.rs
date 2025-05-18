@@ -288,6 +288,7 @@ impl Parser {
             }
             Token::Collect(tab) => {
                 if(tab == self.tab){
+                    self.pos+=1;
             	    return Some(ASTNode::Collect);
                 }else{
                     return None;
@@ -443,7 +444,6 @@ impl Parser {
                         params.push(self.parse_exp()?);
                     }
 
-                    let val = name.to_string();
                     for x in self.strucs.clone(){
                         match x{
                             ASTNode::StructDef(struct_name, struct_params, _) => {
@@ -463,8 +463,8 @@ impl Parser {
                     }
                     
                     for x in 0..self.funcs.len(){
-                        if let ASTNode::FuncDef(val, _, _, _) = &self.funcs[x]{
-                            if name == *val{
+                        if let ASTNode::FuncDef(func_name, func_params, _, _) = &self.funcs[x]{
+                            if name == *func_name && params.clone().len() == func_params.len(){
                                 if let Token::rParen = self.tokens[self.pos].clone(){
                                     self.pos+=1;
                                     return Some(ASTNode::Func(name.to_string(), params));

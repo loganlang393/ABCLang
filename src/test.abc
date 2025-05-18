@@ -1,16 +1,20 @@
 struct test( int x bool y )
 	func test( int z ) void
 		println 5
-		while (> z 5)
+		while (and (> z 5) (< z 9) )
 			println z
 		vardec int test 5
 		vardec bool test true
 		vardec test test test ( 5 true )
 
 func main() int
-	if (> 5 4)
+	if (or (>= 5 4) (<= 5 2))
 		println 5
 	elif (> 5 3)
 		println 3
 	else
 		println 4
+
+	vardec test testing test ( 6 false )
+
+	collect

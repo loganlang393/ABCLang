@@ -9,6 +9,7 @@ use parser::Parser; // Import the Parser struct
 use code_generator::CodeGenerator;
 use std::env; // Import for command line arguments
 use std::fs; //import for File Reading
+use std::path::Path; //import for file paths
 
 
 fn main() {
@@ -254,5 +255,20 @@ mod tests {
         let mut parser = Parser::new(tokenizer);
 
         let ast = parser.parse();
+    }
+
+    #[test]
+    fn test_code_generation(){
+        let input_file = Path::new("src/test.abc");
+        let input = fs::read_to_string(input_file).expect("file");
+        let output_file = String::from("test_output.c");
+        let output = output_file.as_str();
+
+        let mut tokenizer = Tokenizer::newToken(input.as_str());
+        let mut parser = Parser::new(tokenizer);
+ 
+
+        let mut codeGenerator = CodeGenerator::new(parser, output);
+        codeGenerator.generate();
     }
 }
