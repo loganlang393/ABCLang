@@ -1,5 +1,8 @@
 ---
 title: "ABCLang Documentation"
+author:
+- AB Paxtor Garcia
+- Logan Langewisch
 geometry: margin=0.5in
 toc: true
 ---
