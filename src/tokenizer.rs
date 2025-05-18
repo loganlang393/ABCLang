@@ -242,7 +242,9 @@ impl Tokenizer {
                                 return Some(Token::Integer(num.parse().unwrap()));
                             }
                             "collect" =>{
-                                return Some(Token::Collect);
+                                let currTab = self.tab.clone();
+                                self.tab = 0;
+                                return Some(Token::Collect(currTab));
                             }
                             _ => {
                                 return Some(Token::Identifier(id.to_string()));   

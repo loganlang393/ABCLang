@@ -44,7 +44,7 @@ pub enum Token {
     Great,
     LessEqual,
     GreatEqual,
-    Collect,
+    Collect(i32),
     Eof,
 }
 
@@ -95,7 +95,7 @@ impl Token {
             Token::Great => ">".to_string(),
             Token::LessEqual => "<=".to_string(),
             Token::GreatEqual => ">=".to_string(),
-            Token::Collect => "collect".to_string(),
+            Token::Collect(n) => "collect".to_string(),
             Token::Eof => "EOF".to_string(),
         }
     }

@@ -238,9 +238,8 @@ impl CodeGenerator {
             self.tab += 1;
             for stmt in body {
                 if let ASTNode::VarDec(_, var_type, _) = stmt.clone(){
-                    if var_type != "int".to_string() || var_type != "bool".to_string(){
+                    if var_type != "int".to_string() && var_type != "bool".to_string(){
                         func_structs.push(var_type.clone().to_string());
-                        writeln!(self.file, "{}Reference {}_reference = gc_allocate(&{}, sizeof({}), NULL);", indent, var_type.clone(), self.heap, var_type.clone()).unwrap();
                     }
                 }
                 self.generate_stmt(stmt.clone());
@@ -261,6 +260,10 @@ impl CodeGenerator {
             write!(self.file, "{}{} {} = ", indent, var_type, var_name).unwrap();
             self.generate_exp(&*expr);
             writeln!(self.file, ";").unwrap();
+
+            if var_type != "int".to_string() && var_type != "bool".to_string(){                                                                        
+                writeln!(self.file, "{}Reference {}_reference = gc_allocate(&{}, sizeof({}), NULL);", indent, var_type.clone(), self.heap, var_type.clone()).unwrap();                    
+            }
         }
     }
 
@@ -360,16 +363,16 @@ impl CodeGenerator {
     fn generate_exp(&mut self, node: &ASTNode) {
         match node {
             ASTNode::Integer(n) => {
-                write!(self.file, "{}", n).unwrap();
+                write!(self.file, "{} ", n).unwrap();
             }
             ASTNode::Bool(b) => {
-                write!(self.file, "{}", if *b { "true" } else { "false" }).unwrap();
+                write!(self.file, "{} ", if *b { "true" } else { "false" }).unwrap();
             }
             ASTNode::Var(name) => {
-                write!(self.file, "{}", name).unwrap();
+                write!(self.file, "{} ", name).unwrap();
             }
             ASTNode::Struct(name, params) => {
-                write!(self.file, "{{"). unwrap();   
+                write!(self.file, "{{{}", ' '). unwrap();   
 
                 for x in params{
                     self.generate_exp(x)
@@ -476,9 +479,8 @@ impl CodeGenerator {
 
             for stmt in body {                                                                                                          
                 if let ASTNode::VarDec(_, var_type, _) = stmt.clone(){                                                                      
-                    if var_type != "int".to_string() || var_type != "bool".to_string(){                                                         
+                    if var_type != "int".to_string() && var_type != "bool".to_string(){                                                         
                         func_structs.push(var_type.clone().to_string());                                                                        
-                        writeln!(self.file, "{}Reference {}_reference = gc_allocate(&{}, sizeof({}), NULL);", indent, var_type.clone(), self.heap, var_type.clone());
                     }
                 }    
                 self.generate_stmt(stmt.clone());

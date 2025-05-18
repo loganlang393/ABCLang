@@ -107,22 +107,27 @@ typedef struct test {
 } test;
 
 void test(test* &s, int z) {
-	printf("%d\n", 5);
-	while (z > 5) {
-		printf("%d\n", z);
+	printf("%d\n", 5 );
+	while (z  > 5 ) {
+		printf("%d\n", z );
 	}
+	int test = 5 ;
+	bool test = true ;
+	test test = { 5 true };
+	Reference test_reference = gc_allocate(&heap, sizeof(test), NULL);
+	gc_deallocate(&heap, test_reference);
 }
 
 int main() {
 	char* heap_list = malloc(sizeof(char) * 1024);
 	Heap heap = {heap_list, &heap_list[511], &heap_list[0], true, &heap_list[1023], 1024, malloc(sizeof(Reference) * 50), 0}
-	if (5 > 4) {
-		printf("%d\n", 5);
+	if (5  > 4 ) {
+		printf("%d\n", 5 );
 	}
-	else if (5 > 3) {
-		printf("%d\n", 3);
+	else if (5  > 3 ) {
+		printf("%d\n", 3 );
 	}
 	else {
-		printf("%d\n", 4);
+		printf("%d\n", 4 );
 	}
 }

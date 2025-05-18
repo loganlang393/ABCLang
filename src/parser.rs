@@ -125,6 +125,7 @@ impl Parser {
                 if matches!(self.tokens[self.pos].clone(), Token::rParen) {
                     self.tab += 1;
                     self.pos+=1;
+                    self.strucs.push(ASTNode::StructDef(name.clone(), params.clone(), Vec::new()));
                     let mut body = Vec::new();
 
                     while let stmt = self.tokens[self.pos].clone(){
@@ -146,7 +147,8 @@ impl Parser {
                     }
 
                     self.tab -= 1;
-                    self.strucs.push(ASTNode::StructDef(name.clone(), params.clone(), body.clone()));
+                    //self.strucs.push(ASTNode::StructDef(name.clone(), params.clone(), body.clone()));
+                    println!("{:?}", self.strucs);
                     return ASTNode::StructDef(name, params, body);
                 }else{
                     panic!("Failed to parse struct definition: no right parenthisis for parameters");
@@ -199,6 +201,8 @@ impl Parser {
                         _ => panic!("Expected return type"),
                     };
                     
+                    self.funcs.push(ASTNode::FuncDef(name.clone(), params.clone(), ret_type.clone(), Vec::new()));
+
                     self.pos+=1;
                     self.tab += 1;
                     let mut body = Vec::new();
@@ -208,7 +212,7 @@ impl Parser {
                     }
                     self.tab -= 1;
                     //println!("{}", self.tab);
-                    self.funcs.push(ASTNode::FuncDef(name.clone(), params.clone(), ret_type.clone(), body.clone()));
+                    //self.funcs.push(ASTNode::FuncDef(name.clone(), params.clone(), ret_type.clone(), body.clone()));
                     return ASTNode::FuncDef(name, params, ret_type, body);
                 }else{
                     panic!("Failed to parse function definition: no right parenthesis");
@@ -225,20 +229,7 @@ impl Parser {
         let param_type = match self.tokens[self.pos].clone() {
             Token::kwInt => "int".to_string(),
             Token::kwBool => "bool".to_string(),
-            Token::Identifier(name) => {
-                let mut var_type = "".to_string();
-                for x in 0..self.strucs.len(){
-                    if let ASTNode::StructDef(struct_name, _, _) = &self.strucs[x]{
-                            if name == *struct_name{
-                                var_type = name.to_string();
-                            }
-                        }
-                }
-                if var_type == ""{
-                    panic!("Unknown variable type {}", name)
-                }
-                var_type
-            }
+            Token::Identifier(name) => name.to_string(),
             _ => panic!("Expected variable type"),
         };
         self.pos+=1;
@@ -295,8 +286,22 @@ impl Parser {
                     return None;
                 }
             }
-            Token::Collect => {
-            	return Some(ASTNode::Collect);
+            Token::Collect(tab) => {
+                if(tab == self.tab){
+            	    return Some(ASTNode::Collect);
+                }else{
+                    return None;
+                }
+            }
+            Token::kwVarDec(tab) => {
+                println!("variable tab {}", tab);
+                if(tab == self.tab){
+                    println!("same tab");
+                    self.pos+=1;
+                    return Some(self.parse_var_dec(tab));
+                }else{
+                    return None;
+                }
             }
             // Add other statements as necessary
             _ => {return None}
@@ -438,25 +443,31 @@ impl Parser {
                         params.push(self.parse_exp()?);
                     }
 
-                    for x in 0..self.strucs.len(){
-                        if let ASTNode::StructDef(struct_name, struct_params, _) = &self.strucs[x]{
-                            if name == *struct_name && params.clone().len() == struct_params.len(){
-                                if let Token::rParen = self.tokens[self.pos].clone(){
-                                    self.pos+=1;
-                                    return Some(ASTNode::Struct(struct_name.to_string(), params));
-                                }else{
-                                    panic!("Failed to parse structure call: missing right parenthesis");
+                    let val = name.to_string();
+                    for x in self.strucs.clone(){
+                        match x{
+                            ASTNode::StructDef(struct_name, struct_params, _) => {
+                                if name == *struct_name && params.clone().len() == struct_params.len(){
+                                    if let Token::rParen = self.tokens[self.pos].clone(){
+                                        self.pos+=1;
+                                        return Some(ASTNode::Struct(name.to_string(), params));
+                                    }else{
+                                        panic!("Failed to parse structure call: missing right parenthesis");
+                                    }
                                 }
+                            }
+                            _ => {
+                                break;
                             }
                         }
                     }
                     
                     for x in 0..self.funcs.len(){
-                        if let ASTNode::FuncDef(func_name, func_params, _, _) = &self.funcs[x]{
-                            if name == *func_name && params.clone().len() == func_params.len(){
+                        if let ASTNode::FuncDef(val, _, _, _) = &self.funcs[x]{
+                            if name == *val{
                                 if let Token::rParen = self.tokens[self.pos].clone(){
                                     self.pos+=1;
-                                    return Some(ASTNode::Func(func_name.to_string(), params));
+                                    return Some(ASTNode::Func(name.to_string(), params));
                                 }else{ 
                                     panic!("Failed to parse function call: missing right parenthesis");
                                 }

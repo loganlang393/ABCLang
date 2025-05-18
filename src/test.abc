@@ -3,6 +3,9 @@ struct test( int x bool y )
 		println 5
 		while (> z 5)
 			println z
+		vardec int test 5
+		vardec bool test true
+		vardec test test test ( 5 true )
 
 func main() int
 	if (> 5 4)
